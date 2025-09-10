@@ -1,0 +1,29 @@
+{
+  "name": "landing-page-4-species",
+  "version": "1.0.0",
+  "description": "Landing page for 4 species Sukkah packages by Yehuda Avoros",
+  "main": "index.html",
+  "scripts": {
+    "serve": "python3 -m http.server 8080",
+    "lighthouse": "node run-performance-tests.js",
+    "lighthouse-simple": "lighthouse http://localhost:8080 --output html --output-path ./reports/lighthouse-simple.html",
+    "lighthouse-ci": "lighthouse http://localhost:8080 --output json --output-path ./reports/lighthouse-ci.json",
+    "performance": "npm run lighthouse",
+    "test-form": "node test-form-submission.js",
+    "test": "echo \"Run 'npm run serve' then 'npm run lighthouse' to test performance\" && exit 0"
+  },
+  "keywords": [
+    "landing-page",
+    "sukkah",
+    "4-species",
+    "hebrew",
+    "order-form"
+  ],
+  "author": "Yehuda Avoros",
+  "license": "MIT",
+  "devDependencies": {
+    "lighthouse": "^12.8.2",
+    "chrome-launcher": "^1.1.0"
+  },
+  "dependencies": {}
+}
