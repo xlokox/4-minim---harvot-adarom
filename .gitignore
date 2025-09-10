@@ -39,10 +39,13 @@ test-*.js
 quick-setup.html
 accessibility-test.html
 
-# Documentation (optional - you can remove these lines if you want to include docs)
-*.md
-!README.md
+# Documentation files to ignore (keep README.md)
+FINAL-STATUS.md
+LEGAL-COMPLIANCE-FINAL.md
+VERIFICATION-CHECKLIST.md
+accessibility-checklist.md
+israeli-law-compliance.md
+google-sheets-setup.md
 
 # Netlify deploy folder
 netlify-deploy/
-node_modules
