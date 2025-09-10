@@ -3,17 +3,17 @@
  * This file handles sending form data to Google Sheets using Google Apps Script Web App
  */
 
-// Configuration
+// Configuration - Uses global CONFIG from config.js
 const GOOGLE_SHEETS_CONFIG = {
-    // Your Google Apps Script Web App URL - PRODUCTION!
-    webAppUrl: 'https://script.google.com/macros/s/AKfycbyQWQdSCd4TlkgA8dek-Qo1JJEbsS2NcH3597PweTeYVbtrcd9ay7GBuDjJVN1xAnXY/exec',
+    // Your Google Apps Script Web App URL - Uses CONFIG
+    webAppUrl: window.CONFIG?.GOOGLE_SHEETS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbyQWQdSCd4TlkgA8dek-Qo1JJEbsS2NcH3597PweTeYVbtrcd9ay7GBuDjJVN1xAnXY/exec',
 
     // Timeout for requests (in milliseconds)
-    timeout: 10000,
+    timeout: window.CONFIG?.REQUEST_TIMEOUT || 10000,
 
     // Retry configuration
-    maxRetries: 3,
-    retryDelay: 1000
+    maxRetries: window.CONFIG?.MAX_RETRIES || 3,
+    retryDelay: window.CONFIG?.RETRY_DELAY || 1000
 };
 
 // Check if URL is configured
