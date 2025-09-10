@@ -1,8 +1,5 @@
 // DOM elements
 const orderForm = document.getElementById('orderForm');
-const quantitySelect = document.getElementById('quantity');
-const customQuantityGroup = document.getElementById('customQuantityGroup');
-const customQuantityInput = document.getElementById('customQuantity');
 const successMessage = document.getElementById('successMessage');
 
 // Form validation rules
@@ -23,10 +20,15 @@ const validationRules = {
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         message: 'נא להזין כתובת אימייל תקינה'
     },
+    city: {
+        required: true,
+        minLength: 2,
+        message: 'נא להזין שם עיר (לפחות 2 תווים)'
+    },
     address: {
         required: true,
-        minLength: 10,
-        message: 'נא להזין כתובת מלאה (לפחות 10 תווים)'
+        minLength: 5,
+        message: 'נא להזין כתובת מלאה (לפחות 5 תווים)'
     },
     package: {
         required: true,
@@ -70,8 +72,7 @@ function setupEventListeners() {
     // Form submission
     orderForm.addEventListener('submit', handleFormSubmit);
     
-    // Quantity selection change
-    quantitySelect.addEventListener('change', toggleCustomQuantity);
+    // No longer need quantity selection since we use shopping cart
     
     // Real-time validation
     const inputs = orderForm.querySelectorAll('input, textarea, select');
@@ -80,11 +81,7 @@ function setupEventListeners() {
         input.addEventListener('input', () => clearError(input));
     });
     
-    // Package selection validation
-    const packageRadios = orderForm.querySelectorAll('input[name="package"]');
-    packageRadios.forEach(radio => {
-        radio.addEventListener('change', () => validateField(radio));
-    });
+    // No longer need package validation since we use shopping cart
 }
 
 function setupAccessibility() {
@@ -123,19 +120,7 @@ function handleRadioKeydown(event) {
     }
 }
 
-function toggleCustomQuantity() {
-    const isOther = quantitySelect.value === 'other';
-    customQuantityGroup.style.display = isOther ? 'block' : 'none';
-    
-    if (isOther) {
-        customQuantityInput.required = true;
-        customQuantityInput.focus();
-    } else {
-        customQuantityInput.required = false;
-        customQuantityInput.value = '';
-        clearError(customQuantityInput);
-    }
-}
+// Function removed - no longer needed with shopping cart system
 
 function handleFormSubmit(event) {
     event.preventDefault();
@@ -162,7 +147,7 @@ function validateForm() {
     let isValid = true;
     
     // Validate all fields
-    const fields = ['fullName', 'phone', 'email', 'address', 'quantity', 'terms'];
+    const fields = ['fullName', 'phone', 'email', 'city', 'address', 'quantity', 'terms'];
     
     fields.forEach(fieldName => {
         const field = document.getElementById(fieldName) || 
@@ -178,12 +163,7 @@ function validateForm() {
         isValid = false;
     }
     
-    // Validate custom quantity if needed
-    if (quantitySelect.value === 'other') {
-        if (!validateField(customQuantityInput)) {
-            isValid = false;
-        }
-    }
+    // No longer need quantity validation since we use shopping cart
     
     return isValid;
 }
@@ -272,6 +252,12 @@ function clearError(field) {
 }
 
 async function submitForm() {
+    // Check if cart is empty
+    if (cart.length === 0) {
+        alert('אנא הוסף מוצרים לשקלול לפני שליחת ההזמנה');
+        return;
+    }
+
     // Collect form data
     const formData = new FormData(orderForm);
     const data = {};
@@ -281,22 +267,39 @@ async function submitForm() {
         data[key] = value;
     }
 
-    // Ensure all required fields are present
-    const requiredFields = ['fullName', 'phone', 'address', 'package', 'quantity', 'terms'];
+    // Parse cart data
+    if (data.cartData) {
+        try {
+            data.cartItems = JSON.parse(data.cartData);
+        } catch (e) {
+            console.error('Error parsing cart data:', e);
+            data.cartItems = { items: [], totalItems: 0, totalPrice: 0 };
+        }
+    }
+
+    // Remove the raw cartData field as we now have cartItems
+    delete data.cartData;
+
+    // Ensure all required fields are present (updated for new form structure)
+    const requiredFields = ['fullName', 'phone', 'city', 'address', 'terms'];
     const missingFields = requiredFields.filter(field => !data[field]);
 
     if (missingFields.length > 0) {
         console.warn('Missing required fields:', missingFields);
-    }
-
-    // Handle custom quantity if selected
-    if (quantitySelect.value === 'other') {
-        data.quantity = customQuantityInput.value;
+        // Show validation errors for missing fields
+        missingFields.forEach(field => {
+            const errorElement = document.getElementById(`${field}-error`);
+            if (errorElement) {
+                errorElement.textContent = 'שדה חובה';
+                errorElement.style.display = 'block';
+            }
+        });
+        return; // Don't submit if required fields are missing
     }
 
     // Add additional data
     data.timestamp = new Date().toLocaleString('he-IL');
-    data.totalPrice = calculateTotalPrice(data);
+    data.totalPrice = data.cartItems ? data.cartItems.totalPrice : 0;
 
     // Debug: Log all collected data with detailed info
     console.log('=== FORM DATA DEBUG ===');
@@ -361,15 +364,21 @@ async function submitForm() {
 }
 
 function calculateTotalPrice(data) {
+    // If we have cart items, use their total
+    if (data.cartItems && data.cartItems.totalPrice) {
+        return data.cartItems.totalPrice;
+    }
+
+    // Fallback for old package-based pricing (if still needed)
     const prices = {
         basic: 120,
         perfect: 180,
         premium: 250
     };
-    
+
     const basePrice = prices[data.package] || 0;
     const quantity = parseInt(data.quantity) || 1;
-    
+
     return basePrice * quantity;
 }
 
@@ -406,3 +415,482 @@ window.addEventListener('beforeunload', function() {
     }
     localStorage.setItem('orderFormBackup', JSON.stringify(data));
 });
+
+// Product pricing data for individual items
+const productPricing = {
+    // Sets
+    'set-moroccan': {
+        kosher: 118,
+        mehadrin: 158,
+        mehadrin_plus: 191
+    },
+    'set-ashkenazi': {
+        kosher: 94,
+        mehadrin: 114,
+        mehadrin_plus: 127
+    },
+    'set-yemenite': {
+        kosher: 110,
+        mehadrin: 150,
+        mehadrin_plus: 180
+    },
+    // Individual items
+    'etrog-yemenite': {
+        kosher: 30,
+        mehadrin: 55,
+        mehadrin_plus: 80
+    },
+    'etrog-ashkenazi': {
+        kosher: 16,
+        mehadrin: 21,
+        mehadrin_plus: 26
+    },
+    'etrog-moroccan': {
+        kosher: 40,
+        mehadrin: 65,
+        mehadrin_plus: 90
+    },
+    lulav: {
+        kosher: 34,
+        mehadrin: 60
+    },
+    hadass: {
+        kosher: 15,
+        mehadrin: 25
+    },
+    arava: {
+        kosher: 12,
+        mehadrin: 20
+    }
+};
+
+// Update price based on kashrut selection
+function updatePrice(kashrutSelect) {
+    const product = kashrutSelect.dataset.product;
+    const priceDisplay = document.getElementById(`${product}-price`);
+    const quantitySelect = document.querySelector(`.quantity-select[data-product="${product}"]`);
+
+    const kashrut = kashrutSelect.value;
+    const quantity = quantitySelect ? quantitySelect.value : 1;
+
+    if (kashrut && productPricing[product]) {
+        const unitPrice = productPricing[product][kashrut];
+        const totalPrice = quantity ? unitPrice * parseInt(quantity) : unitPrice;
+
+        if (quantity && quantity !== "") {
+            priceDisplay.innerHTML = `
+                <div class="price-breakdown">
+                    <div class="unit-price">${unitPrice}₪ ליחידה</div>
+                    <div class="final-price">${totalPrice}₪ סה"כ</div>
+                </div>
+            `;
+        } else {
+            priceDisplay.innerHTML = `<div class="final-price">${unitPrice}₪</div>`;
+        }
+    } else {
+        priceDisplay.innerHTML = '';
+    }
+}
+
+// Update price when quantity changes
+function updateQuantity(quantitySelect) {
+    const product = quantitySelect.dataset.product;
+    const kashrutSelect = document.querySelector(`.kashrut-select[data-product="${product}"]`);
+
+    if (kashrutSelect.value) {
+        updatePrice(kashrutSelect);
+    }
+}
+
+// Shopping cart functionality
+let cart = [];
+
+// Add event listeners for dropdowns and cart functionality
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        setupProductEventListeners();
+        updateCartDisplay();
+        updateOrderSummary();
+    } catch (error) {
+        console.error('Error initializing cart functionality:', error);
+    }
+});
+
+function setupProductEventListeners() {
+    // Add event listeners for all kashrut and quantity selects
+    const kashrutSelects = document.querySelectorAll('.kashrut-select');
+    const quantitySelects = document.querySelectorAll('.quantity-select');
+
+    kashrutSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            updateAddToCartButton(this.dataset.product);
+        });
+    });
+
+    quantitySelects.forEach(select => {
+        select.addEventListener('change', function() {
+            updateAddToCartButton(this.dataset.product);
+        });
+    });
+}
+
+function updateAddToCartButton(productId) {
+    const kashrutSelect = document.getElementById(`${productId}-kashrut`);
+    const quantitySelect = document.getElementById(`${productId}-quantity`);
+    const addButton = document.querySelector(`button[onclick*="${productId}"]`);
+
+    if (!kashrutSelect || !quantitySelect || !addButton) {
+        console.warn(`Elements not found for product: ${productId}`);
+        return;
+    }
+
+    if (kashrutSelect.value && quantitySelect.value) {
+        addButton.disabled = false;
+    } else {
+        addButton.disabled = true;
+    }
+}
+
+function addToCart(productId, productName) {
+    const kashrutSelect = document.getElementById(`${productId}-kashrut`);
+    const quantitySelect = document.getElementById(`${productId}-quantity`);
+
+    if (!kashrutSelect || !quantitySelect) {
+        console.error(`Elements not found for product: ${productId}`);
+        alert('שגיאה: לא ניתן למצוא את האלמנטים הנדרשים');
+        return;
+    }
+
+    const kashrut = kashrutSelect.value;
+    const quantity = parseInt(quantitySelect.value);
+
+    if (!kashrut || !quantity) {
+        alert('אנא בחר רמת כשרות וכמות');
+        return;
+    }
+
+    // Get price from productPricing
+    const unitPrice = productPricing[productId][kashrut];
+    const totalPrice = unitPrice * quantity;
+
+    // Get kashrut display name
+    const kashrutText = kashrutSelect.options[kashrutSelect.selectedIndex].text.split(' - ')[0];
+
+    // Create cart item
+    const cartItem = {
+        id: `${productId}-${kashrut}-${Date.now()}`,
+        productId: productId,
+        productName: productName,
+        kashrut: kashrut,
+        kashrutText: kashrutText,
+        quantity: quantity,
+        unitPrice: unitPrice,
+        totalPrice: totalPrice
+    };
+
+    // Add to cart
+    cart.push(cartItem);
+
+    // Reset form
+    kashrutSelect.value = '';
+    quantitySelect.value = '';
+    updateAddToCartButton(productId);
+
+    // Update display
+    updateCartDisplay();
+
+    // Show success message
+    showAddToCartMessage(productName, quantity, kashrutText);
+}
+
+function showAddToCartMessage(productName, quantity, kashrut) {
+    // Create temporary message
+    const message = document.createElement('div');
+    message.className = 'cart-success-message';
+    message.textContent = `נוסף לשקלול: ${quantity} ${productName} ${kashrut}`;
+    message.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+
+    document.body.appendChild(message);
+
+    setTimeout(() => {
+        message.remove();
+    }, 3000);
+}
+
+// New add to cart functionality for inline quantity inputs
+function addProductToCart(productId, productName) {
+    try {
+        let addedItems = [];
+
+        // Get all quantity inputs for this product
+        const quantityInputs = document.querySelectorAll(`input[data-product="${productId}"]`);
+
+        quantityInputs.forEach(input => {
+            const quantity = parseInt(input.value) || 0;
+            if (quantity > 0) {
+                const kashrut = input.dataset.kashrut;
+                const unitPrice = parseInt(input.dataset.price);
+
+                // Get kashrut display name
+                const kashrutText = kashrut === 'kosher' ? 'כשר' :
+                                   kashrut === 'mehadrin' ? 'מהודר' :
+                                   kashrut === 'mehadrin_plus' ? 'מהודר א\'' : kashrut;
+
+                const cartItem = {
+                    id: `${productId}-${kashrut}-${Date.now()}`,
+                    productId: productId,
+                    productName: productName,
+                    kashrut: kashrut,
+                    kashrutText: kashrutText,
+                    quantity: quantity,
+                    unitPrice: unitPrice,
+                    totalPrice: unitPrice * quantity
+                };
+
+                // Add to cart
+                cart.push(cartItem);
+                addedItems.push(`${quantity} ${kashrutText}`);
+
+                // Reset input
+                input.value = 0;
+            }
+        });
+
+        if (addedItems.length > 0) {
+            updateCartDisplay();
+
+            // Show success message
+            const message = document.createElement('div');
+            message.className = 'cart-success-message';
+            message.textContent = `נוסף לשקלול: ${productName} - ${addedItems.join(', ')}`;
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 8px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+
+            document.body.appendChild(message);
+
+            setTimeout(() => {
+                message.remove();
+            }, 3000);
+        } else {
+            alert('אנא בחר כמות לפחות עבור רמת כשרות אחת');
+        }
+
+    } catch (error) {
+        console.error('Error adding product to cart:', error);
+        alert('שגיאה בהוספה לשקלול');
+    }
+}
+
+function updateCartDisplay() {
+    const cartItems = document.getElementById('cartItems');
+    const cartSummary = document.getElementById('cartSummary');
+    const emptyCart = document.getElementById('emptyCart');
+    const totalPrice = document.getElementById('totalPrice');
+
+    // Check if elements exist
+    if (!cartItems || !cartSummary || !totalPrice) {
+        console.warn('Cart elements not found');
+        return;
+    }
+
+    if (cart.length === 0) {
+        if (emptyCart) emptyCart.style.display = 'block';
+        cartSummary.style.display = 'none';
+        cartItems.innerHTML = '<div class="empty-cart" id="emptyCart"><p>השקלול ריק - בחר מוצרים מהרשימה למעלה</p></div>';
+        updateCartDataField();
+        updateOrderSummary();
+        return;
+    }
+
+    if (emptyCart) emptyCart.style.display = 'none';
+    cartSummary.style.display = 'flex';
+
+    // Build cart items HTML
+    let cartHTML = '';
+    let total = 0;
+
+    cart.forEach(item => {
+        total += item.totalPrice;
+        cartHTML += `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.productName}</div>
+                    <div class="cart-item-details">${item.kashrutText} × ${item.quantity} = ${item.totalPrice}₪</div>
+                </div>
+                <div class="cart-item-price">${item.totalPrice}₪</div>
+                <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" title="הסר מהשקלול">×</button>
+            </div>
+        `;
+    });
+
+    cartItems.innerHTML = cartHTML;
+    totalPrice.textContent = total;
+
+    // Update hidden form field and order summary
+    updateCartDataField();
+    updateOrderSummary();
+}
+
+function updateCartDataField() {
+    const cartDataField = document.getElementById('cartData');
+    if (cartDataField) {
+        // Create a simplified version of cart data for the form
+        const cartSummary = {
+            items: cart.map(item => ({
+                productName: item.productName,
+                kashrut: item.kashrutText,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                totalPrice: item.totalPrice
+            })),
+            totalItems: cart.length,
+            totalPrice: cart.reduce((sum, item) => sum + item.totalPrice, 0)
+        };
+
+        cartDataField.value = JSON.stringify(cartSummary);
+    }
+
+    // Update form cart summary display
+    updateFormCartSummary();
+}
+
+function updateFormCartSummary() {
+    const formCartSummary = document.getElementById('formCartSummary');
+    const formCartItems = document.getElementById('formCartItems');
+    const formTotalPrice = document.getElementById('formTotalPrice');
+
+    if (!formCartSummary || !formCartItems || !formTotalPrice) {
+        console.warn('Form cart summary elements not found');
+        return;
+    }
+
+    if (cart.length === 0) {
+        formCartSummary.style.display = 'none';
+        return;
+    }
+
+    formCartSummary.style.display = 'block';
+
+    // Build form cart items HTML
+    let formCartHTML = '';
+    let total = 0;
+
+    cart.forEach(item => {
+        total += item.totalPrice;
+        formCartHTML += `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 6px;">
+                <span>${item.productName} - ${item.kashrutText} × ${item.quantity}</span>
+                <strong>${item.totalPrice}₪</strong>
+            </div>
+        `;
+    });
+
+    formCartItems.innerHTML = formCartHTML;
+    formTotalPrice.textContent = total;
+}
+
+function removeFromCart(itemId) {
+    try {
+        cart = cart.filter(item => item.id !== itemId);
+        updateCartDisplay();
+    } catch (error) {
+        console.error('Error removing item from cart:', error);
+    }
+}
+
+function clearCart() {
+    if (confirm('האם אתה בטוח שברצונך לרוקן את השקלול?')) {
+        cart = [];
+        updateCartDisplay();
+        updateOrderSummary();
+    }
+}
+
+// Order Summary Functions
+function updateOrderSummary() {
+    const orderSummarySection = document.getElementById('orderSummary');
+    const summaryItems = document.getElementById('summaryItems');
+    const summaryTotalItems = document.getElementById('summaryTotalItems');
+    const summaryTotalPrice = document.getElementById('summaryTotalPrice');
+
+    if (!orderSummarySection || !summaryItems || !summaryTotalItems || !summaryTotalPrice) {
+        console.warn('Order summary elements not found');
+        return;
+    }
+
+    if (cart.length === 0) {
+        orderSummarySection.style.display = 'none';
+        return;
+    }
+
+    orderSummarySection.style.display = 'block';
+
+    // Build summary items HTML
+    let summaryHTML = '';
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    cart.forEach(item => {
+        totalItems += item.quantity;
+        totalPrice += item.totalPrice;
+        summaryHTML += `
+            <div class="summary-item">
+                <div class="summary-item-info">
+                    <div class="summary-item-name">${item.productName}</div>
+                    <div class="summary-item-details">${item.kashrutText} × ${item.quantity} יחידות</div>
+                </div>
+                <div class="summary-item-price">${item.totalPrice}₪</div>
+                <button class="summary-item-remove" onclick="removeFromCart('${item.id}')" title="הסר פריט">×</button>
+            </div>
+        `;
+    });
+
+    summaryItems.innerHTML = summaryHTML;
+    summaryTotalItems.textContent = totalItems;
+    summaryTotalPrice.textContent = `${totalPrice}₪`;
+}
+
+function scrollToCart() {
+    try {
+        const cartSection = document.getElementById('cart');
+        if (cartSection) {
+            cartSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            console.warn('Cart section not found');
+        }
+    } catch (error) {
+        console.error('Error scrolling to cart:', error);
+    }
+}
+
+function proceedToForm() {
+    try {
+        const orderForm = document.querySelector('.order-form');
+        if (orderForm) {
+            orderForm.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            console.warn('Order form not found');
+        }
+    } catch (error) {
+        console.error('Error scrolling to form:', error);
+    }
+}

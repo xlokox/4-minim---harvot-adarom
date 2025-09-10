@@ -90,6 +90,7 @@ function prepareDataForSheets(formData) {
         fullName: String(formData.fullName || 'טסט'),
         phone: String(formData.phone || '0501234567'),
         email: String(formData.email || 'test@test.com'),
+        city: String(formData.city || 'עיר טסט'),
         address: String(formData.address || 'כתובת טסט'),
         package: String(formData.package || 'basic'),
         quantity: String(formData.quantity || '1'),
