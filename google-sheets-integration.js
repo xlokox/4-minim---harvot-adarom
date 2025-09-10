@@ -96,6 +96,7 @@ function prepareDataForSheets(formData) {
         quantity: String(formData.quantity || '1'),
         notes: String(formData.notes || ''),
         terms: String(formData.terms || 'on'),
+        contactApproval: String(formData.contactApproval || 'on'),
         totalPrice: String(formData.totalPrice || '120')
     };
 

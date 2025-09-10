@@ -47,6 +47,10 @@ const validationRules = {
     terms: {
         required: true,
         message: 'נא לאשר את תנאי השימוש'
+    },
+    contactApproval: {
+        required: true,
+        message: 'נא לאשר יצירת קשר לאישור ההזמנה'
     }
 };
 
@@ -147,7 +151,7 @@ function validateForm() {
     let isValid = true;
     
     // Validate all fields
-    const fields = ['fullName', 'phone', 'email', 'city', 'address', 'quantity', 'terms'];
+    const fields = ['fullName', 'phone', 'email', 'city', 'address', 'quantity', 'terms', 'contactApproval'];
     
     fields.forEach(fieldName => {
         const field = document.getElementById(fieldName) || 
@@ -281,7 +285,7 @@ async function submitForm() {
     delete data.cartData;
 
     // Ensure all required fields are present (updated for new form structure)
-    const requiredFields = ['fullName', 'phone', 'city', 'address', 'terms'];
+    const requiredFields = ['fullName', 'phone', 'city', 'address', 'terms', 'contactApproval'];
     const missingFields = requiredFields.filter(field => !data[field]);
 
     if (missingFields.length > 0) {
@@ -785,6 +789,7 @@ function updateFormCartSummary() {
 
     if (cart.length === 0) {
         formCartSummary.style.display = 'none';
+        updateSubmitButtonPrice(0);
         return;
     }
 
@@ -806,6 +811,25 @@ function updateFormCartSummary() {
 
     formCartItems.innerHTML = formCartHTML;
     formTotalPrice.textContent = total;
+
+    // Update submit button with price
+    updateSubmitButtonPrice(total);
+}
+
+function updateSubmitButtonPrice(total) {
+    const submitPrice = document.getElementById('submitPrice');
+
+    if (!submitPrice) {
+        console.warn('Submit price element not found');
+        return;
+    }
+
+    if (total > 0) {
+        submitPrice.textContent = `${total}₪`;
+        submitPrice.style.display = 'inline-block';
+    } else {
+        submitPrice.style.display = 'none';
+    }
 }
 
 function removeFromCart(itemId) {
@@ -894,3 +918,120 @@ function proceedToForm() {
         console.error('Error scrolling to form:', error);
     }
 }
+
+// Terms Modal Functions
+function openTermsModal() {
+    const modal = document.getElementById('termsModal');
+    if (modal) {
+        modal.style.display = 'block';
+        modal.setAttribute('aria-hidden', 'false');
+
+        // Focus on the close button for accessibility
+        const closeButton = modal.querySelector('.modal-close');
+        if (closeButton) {
+            closeButton.focus();
+        }
+
+        // Prevent body scroll when modal is open
+        document.body.style.overflow = 'hidden';
+
+        // Add escape key listener
+        document.addEventListener('keydown', handleModalEscape);
+
+        // Add click outside to close
+        modal.addEventListener('click', handleModalOutsideClick);
+    }
+}
+
+function closeTermsModal() {
+    const modal = document.getElementById('termsModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+
+        // Restore body scroll
+        document.body.style.overflow = '';
+
+        // Remove event listeners
+        document.removeEventListener('keydown', handleModalEscape);
+        modal.removeEventListener('click', handleModalOutsideClick);
+
+        // Return focus to the terms link
+        const termsLink = document.querySelector('.terms-link');
+        if (termsLink) {
+            termsLink.focus();
+        }
+    }
+}
+
+function handleModalEscape(event) {
+    if (event.key === 'Escape') {
+        closeTermsModal();
+    }
+}
+
+function handleModalOutsideClick(event) {
+    const modal = document.getElementById('termsModal');
+    if (event.target === modal) {
+        closeTermsModal();
+    }
+}
+
+// Cookie Management Functions
+function showCookieBanner() {
+    const banner = document.getElementById('cookieBanner');
+    const consent = localStorage.getItem('cookieConsent');
+
+    if (!consent && banner) {
+        banner.style.display = 'block';
+        banner.setAttribute('aria-hidden', 'false');
+    }
+}
+
+function acceptCookies() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    hideCookieBanner();
+
+    // Initialize Google Analytics or other tracking
+    if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+            'analytics_storage': 'granted'
+        });
+    }
+
+    console.log('Cookies accepted');
+}
+
+function declineCookies() {
+    localStorage.setItem('cookieConsent', 'declined');
+    hideCookieBanner();
+
+    // Disable Google Analytics or other tracking
+    if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+            'analytics_storage': 'denied'
+        });
+    }
+
+    console.log('Cookies declined');
+}
+
+function hideCookieBanner() {
+    const banner = document.getElementById('cookieBanner');
+    if (banner) {
+        banner.style.display = 'none';
+        banner.setAttribute('aria-hidden', 'true');
+    }
+}
+
+// Initialize cookie banner on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Show cookie banner after a short delay
+    setTimeout(showCookieBanner, 1000);
+});
+
+// Make functions globally available
+window.openTermsModal = openTermsModal;
+window.closeTermsModal = closeTermsModal;
+window.acceptCookies = acceptCookies;
+window.declineCookies = declineCookies;
