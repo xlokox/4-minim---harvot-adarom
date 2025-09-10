@@ -299,6 +299,123 @@ header h1 {
     transform: scale(1.05);
 }
 
+/* Individual Products Section */
+.individual-products {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 2px solid #e9ecef;
+}
+
+.individual-products h3 {
+    text-align: center;
+    color: #2c5530;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.individual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.individual-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #f0f0f0;
+}
+
+.individual-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    border-color: #4a7c59;
+}
+
+.individual-card h4 {
+    color: #2c5530;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.price-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.price-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.8rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.price-row.single-price {
+    background: #fff;
+    border: none;
+    padding: 0.5rem;
+}
+
+.origin {
+    font-weight: 600;
+    color: #4a7c59;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 0.3rem;
+}
+
+.prices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.price {
+    font-size: 0.85rem;
+    color: #666;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.7);
+}
+
+.price.featured {
+    background: linear-gradient(135deg, #4a7c59, #5d8a6b);
+    color: white;
+    font-weight: 600;
+}
+
+.single-price .prices {
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.single-price .price {
+    background: #f0f8f0;
+    color: #2c5530;
+    font-weight: 500;
+}
+
+.single-price .price.featured {
+    background: linear-gradient(135deg, #4a7c59, #5d8a6b);
+    color: white;
+}
+
+/* Yemenite set styling */
+.product-card.yemenite-set {
+    border-top: 4px solid #d4a574;
+}
+
 /* Packages section */
 .packages {
     padding: 4rem 0;
@@ -742,6 +859,28 @@ footer a:focus {
     
     .radio-group {
         gap: 0.75rem;
+    }
+
+    .individual-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .individual-card {
+        padding: 1.2rem;
+    }
+
+    .price-row {
+        padding: 0.6rem;
+    }
+
+    .single-price .prices {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .individual-products h3 {
+        font-size: 1.5rem;
     }
 }
 
