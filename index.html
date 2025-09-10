@@ -124,22 +124,21 @@
                                 <img src="https://via.placeholder.com/200x150/fff8e1/4a7c59?text=🍋" alt="אתרוג" class="product-image">
                             </div>
                             <h4>אתרוג</h4>
-                            <div class="price-levels">
-                                <div class="price-level">
-                                    <span class="level-name">כשר</span>
-                                    <span class="level-price">₪80</span>
-                                    <small class="origin-note">מרוקאי</small>
+                            <div class="product-options">
+                                <div class="dropdown-container">
+                                    <select class="origin-select" data-product="etrog" onchange="updateKashrutOptions(this)">
+                                        <option value="">בחר סוג אתרוג</option>
+                                        <option value="yemenite">אתרוג תימני</option>
+                                        <option value="ashkenazi">אתרוג אשכנזי</option>
+                                        <option value="moroccan">אתרוג מרוקאי</option>
+                                    </select>
                                 </div>
-                                <div class="price-level">
-                                    <span class="level-name">מהודר</span>
-                                    <span class="level-price">₪130</span>
-                                    <small class="origin-note">מרוקאי</small>
+                                <div class="dropdown-container">
+                                    <select class="kashrut-select" data-product="etrog" disabled onchange="updatePrice(this)">
+                                        <option value="">בחר רמת כשרות</option>
+                                    </select>
                                 </div>
-                                <div class="price-level featured">
-                                    <span class="level-name">מהודר א'</span>
-                                    <span class="level-price">₪180</span>
-                                    <small class="origin-note">מרוקאי</small>
-                                </div>
+                                <div class="price-display" id="etrog-price"></div>
                             </div>
                         </article>
 
@@ -378,6 +377,73 @@
         </div>
     </footer>
 
+    <script>
+        // Product pricing data for Etrog only
+        const etrogPricing = {
+            yemenite: {
+                kosher: 30,
+                mehudar: 55,
+                mehudar_alef: 80
+            },
+            ashkenazi: {
+                kosher: 16,
+                mehudar: 21,
+                mehudar_alef: 26
+            },
+            moroccan: {
+                kosher: 40,
+                mehudar: 65,
+                mehudar_alef: 90
+            }
+        };
+
+        // Kashrut level names
+        const kashrutLevels = {
+            kosher: 'כשר',
+            mehudar: 'מהודר',
+            mehudar_alef: 'מהודר א\''
+        };
+
+        // Update kashrut options based on selected etrog origin
+        function updateKashrutOptions(originSelect) {
+            const origin = originSelect.value;
+            const kashrutSelect = document.querySelector('select[data-product="etrog"].kashrut-select');
+            const priceDisplay = document.getElementById('etrog-price');
+
+            // Clear previous options
+            kashrutSelect.innerHTML = '<option value="">בחר רמת כשרות</option>';
+            priceDisplay.innerHTML = '';
+
+            if (origin && etrogPricing[origin]) {
+                kashrutSelect.disabled = false;
+
+                // Add available kashrut levels for this origin
+                Object.keys(etrogPricing[origin]).forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level;
+                    option.textContent = kashrutLevels[level];
+                    kashrutSelect.appendChild(option);
+                });
+            } else {
+                kashrutSelect.disabled = true;
+            }
+        }
+
+        // Update price based on selected kashrut level
+        function updatePrice(kashrutSelect) {
+            const kashrutLevel = kashrutSelect.value;
+            const originSelect = document.querySelector('select[data-product="etrog"].origin-select');
+            const origin = originSelect.value;
+            const priceDisplay = document.getElementById('etrog-price');
+
+            if (origin && kashrutLevel && etrogPricing[origin] && etrogPricing[origin][kashrutLevel]) {
+                const price = etrogPricing[origin][kashrutLevel];
+                priceDisplay.innerHTML = `<span class="final-price">₪${price}</span>`;
+            } else {
+                priceDisplay.innerHTML = '';
+            }
+        }
+    </script>
     <script src="config.js"></script>
     <script src="google-sheets-integration.js"></script>
     <script src="script.js"></script>

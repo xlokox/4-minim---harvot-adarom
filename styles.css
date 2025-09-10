@@ -400,6 +400,60 @@ header h1 {
     color: rgba(255, 255, 255, 0.8);
 }
 
+/* Product options styling for dropdowns */
+.product-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.dropdown-container {
+    position: relative;
+}
+
+.origin-select, .kashrut-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.9rem;
+    color: #2c5530;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.origin-select:focus, .kashrut-select:focus {
+    outline: none;
+    border-color: #4a7c59;
+    box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
+}
+
+.kashrut-select:disabled {
+    background: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.price-display {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.final-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4a7c59;
+    background: linear-gradient(135deg, #4a7c59, #5d8a6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 0.5rem;
+    border-radius: 8px;
+    display: inline-block;
+}
+
 .single-price .price {
     background: #f0f8f0;
     color: #2c5530;
