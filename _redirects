@@ -1,0 +1,5 @@
+# Netlify redirects file
+# This ensures the site works properly
+
+# Serve index.html for all routes (SPA fallback)
+/*    /index.html   200
