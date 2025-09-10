@@ -38,47 +38,53 @@
                 <h2 id="products-title">המוצרים שלנו</h2>
                 
                 <div class="products-grid">
-                    <article class="product-card">
-                        <div class="product-image-placeholder">🍋</div>
-                        <h3>אתרוג מהודר</h3>
-                        <p>אתרוג איכותי עם פיטם, נבחר בקפידה מיוחדת לפי כל ההלכות</p>
-                        <div class="product-features">
-                            <span class="feature">✓ עם פיטם</span>
-                            <span class="feature">✓ כשר למהדרין</span>
-                            <span class="feature">✓ ללא פגמים</span>
+                    <article class="product-card sephardic-set">
+                        <div class="product-image-container">
+                            <img src="https://via.placeholder.com/300x200/e8f5e8/4a7c59?text=סט+מרוקאי" alt="סט ארבעת המינים מרוקאי" class="product-image">
+                        </div>
+                        <h3>סט מרוקאי</h3>
+                        <p>סט שלם ארבעת המינים במנהג מרוקאי מסורתי</p>
+                        <div class="kashrut-levels">
+                            <div class="kashrut-level">
+                                <span class="level-number">1.</span>
+                                <span class="level-name">כשר</span>
+                                <span class="level-price">₪120</span>
+                            </div>
+                            <div class="kashrut-level">
+                                <span class="level-number">2.</span>
+                                <span class="level-name">מהודר</span>
+                                <span class="level-price">₪180</span>
+                            </div>
+                            <div class="kashrut-level featured">
+                                <span class="level-number">3.</span>
+                                <span class="level-name">מהודר א'</span>
+                                <span class="level-price">₪250</span>
+                            </div>
                         </div>
                     </article>
 
-                    <article class="product-card">
-                        <div class="product-image-placeholder">🌿</div>
-                        <h3>לולב</h3>
-                        <p>לולב ישר וטרי, נבחר בקפידה מיוחדת לפי כל הדרישות ההלכתיות</p>
-                        <div class="product-features">
-                            <span class="feature">✓ ישר ויפה</span>
-                            <span class="feature">✓ טרי ורענן</span>
-                            <span class="feature">✓ כשר למהדרין</span>
+                    <article class="product-card ashkenazi-set">
+                        <div class="product-image-container">
+                            <img src="https://via.placeholder.com/300x200/f0f8f0/4a7c59?text=סט+אשכנזי" alt="סט ארבעת המינים אשכנזי" class="product-image">
                         </div>
-                    </article>
-
-                    <article class="product-card">
-                        <div class="product-image-placeholder">🌱</div>
-                        <h3>הדס</h3>
-                        <p>הדס טרי ומשולש, 3 ענפים לפי המנהג, איכות מעולה</p>
-                        <div class="product-features">
-                            <span class="feature">✓ משולש</span>
-                            <span class="feature">✓ 3 ענפים</span>
-                            <span class="feature">✓ טרי ויפה</span>
-                        </div>
-                    </article>
-
-                    <article class="product-card">
-                        <div class="product-image-placeholder">🍃</div>
-                        <h3>עערבה</h3>
-                        <p>עערבה טריה ואיכותית, 2 ענפים לפי המנהג, נשמרת בקרירות</p>
-                        <div class="product-features">
-                            <span class="feature">✓ טריה ורעננה</span>
-                            <span class="feature">✓ 2 ענפים</span>
-                            <span class="feature">✓ נשמרת בקרירות</span>
+                        <h3>סט אשכנזי</h3>
+                        <p>סט שלם ארבעת המינים במנהג אשכנזי מסורתי</p>
+                        <div class="kashrut-levels">
+                            <div class="kashrut-level">
+                                <span class="level-number">1.</span>
+                                <span class="level-name">כשר</span>
+                                <span class="level-price">₪120</span>
+                            </div>
+                            <div class="kashrut-level">
+                                <span class="level-number">2.</span>
+                                <span class="level-name">מהודר</span>
+                                <span class="level-price">₪180</span>
+                            </div>
+                            <div class="kashrut-level featured">
+                                <span class="level-number">3.</span>
+                                <span class="level-name">מהודר א'</span>
+                                <span class="level-price">₪250</span>
+                            </div>
                         </div>
                     </article>
                 </div>
@@ -163,19 +169,38 @@
                     </div>
 
                     <fieldset class="form-group">
-                        <legend class="required">בחרו חבילה *</legend>
+                        <legend class="required">בחרו סט ורמת כשרות *</legend>
                         <div class="radio-group">
-                            <div class="radio-item">
-                                <input type="radio" id="basic" name="package" value="basic" required>
-                                <label for="basic">חבילה בסיסית - ₪120</label>
+                            <div class="radio-section">
+                                <h4>סט מרוקאי</h4>
+                                <div class="radio-item">
+                                    <input type="radio" id="sephardic-kosher" name="package" value="sephardic-kosher" required>
+                                    <label for="sephardic-kosher">סט מרוקאי - כשר - ₪120</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="sephardic-mehudar" name="package" value="sephardic-mehudar" required>
+                                    <label for="sephardic-mehudar">סט מרוקאי - מהודר - ₪180</label>
+                                </div>
+                                <div class="radio-item featured">
+                                    <input type="radio" id="sephardic-mehudar-a" name="package" value="sephardic-mehudar-a" required>
+                                    <label for="sephardic-mehudar-a">סט מרוקאי - מהודר א' - ₪250</label>
+                                </div>
                             </div>
-                            <div class="radio-item">
-                                <input type="radio" id="perfect" name="package" value="perfect" required>
-                                <label for="perfect">חבילה מושלמת - ₪180</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="premium" name="package" value="premium" required>
-                                <label for="premium">חבילה מהודרת - ₪250</label>
+
+                            <div class="radio-section">
+                                <h4>סט אשכנזי</h4>
+                                <div class="radio-item">
+                                    <input type="radio" id="ashkenazi-kosher" name="package" value="ashkenazi-kosher" required>
+                                    <label for="ashkenazi-kosher">סט אשכנזי - כשר - ₪120</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="ashkenazi-mehudar" name="package" value="ashkenazi-mehudar" required>
+                                    <label for="ashkenazi-mehudar">סט אשכנזי - מהודר - ₪180</label>
+                                </div>
+                                <div class="radio-item featured">
+                                    <input type="radio" id="ashkenazi-mehudar-a" name="package" value="ashkenazi-mehudar-a" required>
+                                    <label for="ashkenazi-mehudar-a">סט אשכנזי - מהודר א' - ₪250</label>
+                                </div>
                             </div>
                         </div>
                         <span id="package-error" class="error-message" role="alert" aria-live="polite"></span>
