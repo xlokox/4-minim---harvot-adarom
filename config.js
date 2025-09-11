@@ -5,7 +5,7 @@
 
 const CONFIG = {
     // Google Apps Script Web App URL
-    GOOGLE_SHEETS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbyQWQdSCd4TlkgA8dek-Qo1JJEbsS2NcH3597PweTeYVbtrcd9ay7GBuDjJVN1xAnXY/exec',
+    GOOGLE_SHEETS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxQGhldZfLBgJsp8o6386-KfvciLlirF0_7S7xAQl8StJE_RAJDj4ka-Z0wo9ggNNs/exec',
     
     // Site Information
     SITE_NAME: 'יהודה אבורוס - 4 המינים',
