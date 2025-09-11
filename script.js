@@ -340,6 +340,9 @@ async function submitForm() {
     data.timestamp = new Date().toLocaleString('he-IL');
     data.totalPrice = data.cartItems ? data.cartItems.totalPrice : 0;
 
+    // Add detailed product breakdown for Google Sheets
+    data = addDetailedProductBreakdown(data);
+
     // Debug: Log all collected data with detailed info
     console.log('=== FORM DATA DEBUG ===');
     console.log('Collected form data:', data);
@@ -1084,6 +1087,114 @@ function scrollToForm() {
             block: 'start'
         });
     }
+}
+
+// Function to add detailed product breakdown
+function addDetailedProductBreakdown(data) {
+    let cartItems = [];
+    let detailedOrderSummary = '';
+    let productBreakdown = {
+        sets: [],
+        etrogim: [],
+        lulav: 0,
+        hadas: 0,
+        arava: 0
+    };
+
+    try {
+        if (data.cartItems && data.cartItems.items) {
+            cartItems = data.cartItems.items;
+        }
+
+        // Process each cart item for detailed breakdown
+        cartItems.forEach(item => {
+            const productName = item.productName || '';
+            const kashrutText = item.kashrutText || '';
+            const quantity = item.quantity || 0;
+            const totalPrice = item.totalPrice || 0;
+
+            // Add to detailed summary
+            detailedOrderSummary += `${productName} - ${kashrutText} × ${quantity} = ${totalPrice}₪\n`;
+
+            // Categorize products for breakdown
+            if (productName.includes('סט')) {
+                let setType = '';
+                if (productName.includes('תימני')) setType = 'תימני';
+                else if (productName.includes('מרוקאי')) setType = 'מרוקאי';
+                else if (productName.includes('אשכנזי')) setType = 'אשכנזי';
+
+                productBreakdown.sets.push({
+                    type: setType,
+                    kashrut: kashrutText,
+                    quantity: quantity,
+                    price: totalPrice
+                });
+            } else if (productName.includes('אתרוג')) {
+                let etrogType = '';
+                if (productName.includes('תימני')) etrogType = 'תימני';
+                else if (productName.includes('מרוקאי')) etrogType = 'מרוקאי';
+                else if (productName.includes('אשכנזי')) etrogType = 'אשכנזי';
+
+                productBreakdown.etrogim.push({
+                    type: etrogType,
+                    kashrut: kashrutText,
+                    quantity: quantity,
+                    price: totalPrice
+                });
+            } else if (productName.includes('לולב')) {
+                productBreakdown.lulav += quantity;
+            } else if (productName.includes('הדס')) {
+                productBreakdown.hadas += quantity;
+            } else if (productName.includes('ערבה')) {
+                productBreakdown.arava += quantity;
+            }
+        });
+    } catch (error) {
+        console.error('Error processing cart items for breakdown:', error);
+        detailedOrderSummary = 'שגיאה בפענוח פרטי ההזמנה';
+    }
+
+    // Create summary strings for Google Sheets
+    const setsOrderSummary = productBreakdown.sets.map(set =>
+        `${set.type} (${set.kashrut}) × ${set.quantity}`
+    ).join(', ') || 'לא הוזמנו סטים';
+
+    const etrogimOrderSummary = productBreakdown.etrogim.map(etrog =>
+        `${etrog.type} (${etrog.kashrut}) × ${etrog.quantity}`
+    ).join(', ') || 'לא הוזמנו אתרוגים';
+
+    const individualItemsSummary = [
+        productBreakdown.lulav > 0 ? `לולב × ${productBreakdown.lulav}` : '',
+        productBreakdown.hadas > 0 ? `הדס × ${productBreakdown.hadas}` : '',
+        productBreakdown.arava > 0 ? `ערבה × ${productBreakdown.arava}` : ''
+    ].filter(item => item).join(', ') || 'לא הוזמנו פריטים בודדים';
+
+    // Add all the detailed data to the data object
+    data.orderNumber = generateOrderNumber();
+    data.totalItems = cartItems.length;
+    data.detailedOrderSummary = detailedOrderSummary.trim();
+    data.setsOrdered = setsOrderSummary;
+    data.etrogimOrdered = etrogimOrderSummary;
+    data.individualItemsOrdered = individualItemsSummary;
+    data.hasTimaniSet = productBreakdown.sets.some(s => s.type === 'תימני') ? 'כן' : 'לא';
+    data.hasMoroccanSet = productBreakdown.sets.some(s => s.type === 'מרוקאי') ? 'כן' : 'לא';
+    data.hasAshkenaziSet = productBreakdown.sets.some(s => s.type === 'אשכנזי') ? 'כן' : 'לא';
+    data.hasEtrogim = productBreakdown.etrogim.length > 0 ? 'כן' : 'לא';
+    data.hasLulav = productBreakdown.lulav > 0 ? 'כן' : 'לא';
+    data.hasHadas = productBreakdown.hadas > 0 ? 'כן' : 'לא';
+    data.hasArava = productBreakdown.arava > 0 ? 'כן' : 'לא';
+
+    return data;
+}
+
+function generateOrderNumber() {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+    return `4M${year}${month}${day}${random}`;
 }
 
 // Make functions globally available

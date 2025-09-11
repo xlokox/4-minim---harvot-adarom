@@ -126,14 +126,23 @@ function generateOrderNumber() {
 
 function validateData(data) {
   if (!data) return false;
-  const requiredFields = ['fullName', 'phone', 'city', 'address', 'terms', 'contactApproval'];
-  
-  for (const field of requiredFields) {
+
+  // Basic required fields
+  const basicRequiredFields = ['fullName', 'phone', 'city', 'terms', 'contactApproval'];
+
+  for (const field of basicRequiredFields) {
     if (!data[field] || data[field].toString().trim() === '') {
       console.error(`❌ Missing required field: ${field}`);
       return false;
     }
   }
+
+  // Address is only required if shipping is needed
+  if (data.needsShipping === 'כן' && (!data.address || data.address.toString().trim() === '')) {
+    console.error(`❌ Address is required when shipping is needed`);
+    return false;
+  }
+
   return true;
 }
 
