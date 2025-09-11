@@ -23,13 +23,55 @@
     </header>
 
     <main id="main-content" role="main">
-        <section class="hero" aria-labelledby="hero-title">
-            <div class="container">
-                <h2 id="hero-title">הזמינו את ארבעת המינים הכשרים ביותר</h2>
-                <p class="hero-description">
-                    מקיימים את מצוות ארבעת המינים בהידור מיוחד עם המוצרים הטריים והכשרים שלנו.
-                    אתרוג מהודר, לולב ישר, הדס טרי ועערבה איכותית - הכל במקום אחד.
-                </p>
+        <!-- Hero Section with 4 Minim Image -->
+        <section class="hero-section" aria-labelledby="hero-title">
+            <div class="hero-background">
+                <div class="hero-image-container">
+                    <img src="./images/4 המינים ראשי.jpg"
+                         alt="ארבעת המינים - אתרוג, לולב, הדס ועערבה לחג הסוכות"
+                         class="hero-image">
+                    <div class="hero-overlay"></div>
+                </div>
+                <div class="floating-elements">
+                    <div class="floating-element element-1">🍋</div>
+                    <div class="floating-element element-2">🌿</div>
+                    <div class="floating-element element-3">🌱</div>
+                    <div class="floating-element element-4">🍃</div>
+                </div>
+            </div>
+
+            <div class="hero-content">
+                <div class="container">
+                    <div class="hero-text-container">
+                        <h1 id="hero-title" class="hero-main-title">
+                            <span class="title-line">ארבעת המינים</span>
+                            <span class="title-line">לחג הסוכות</span>
+                        </h1>
+
+                        <div class="biblical-quote">
+                            <p class="quote-text">
+                                "וּלְקַחְתֶּם לָכֶם בַּיּוֹם הָרִאשׁוֹן פְּרִי עֵץ הָדָר כַּפֹּת תְּמָרִים וַעֲנַף עֵץ עָבֹת וְעַרְבֵי נָחַל וּשְׂמַחְתֶּם לִפְנֵי יְהוָה אֱלֹהֵיכֶם שִׁבְעַת יָמִים."
+                            </p>
+                            <cite class="quote-source">ויקרא כ"ג, מ'</cite>
+                        </div>
+
+                        <p class="hero-description">
+                            מקיימים את מצוות ארבעת המינים בהידור מיוחד עם המוצרים הטריים והכשרים שלנו.
+                            אתרוג מהודר, לולב ישר, הדס טרי ועערבה איכותית - הכל במקום אחד.
+                        </p>
+
+                        <div class="hero-cta">
+                            <button type="button" class="cta-button primary" onclick="scrollToProducts()">
+                                <span class="cta-text">צפה במוצרים</span>
+                                <span class="cta-icon">⬇</span>
+                            </button>
+                            <button type="button" class="cta-button secondary" onclick="scrollToForm()">
+                                <span class="cta-text">הזמן עכשיו</span>
+                                <span class="cta-icon">📞</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -40,7 +82,7 @@
                 <div class="products-grid">
                     <article class="product-card sephardic-set">
                         <div class="product-image-container">
-                            <img src="https://via.placeholder.com/300x200/e8f5e8/4a7c59?text=סט+מרוקאי" alt="סט ארבעת המינים מרוקאי" class="product-image">
+                            <img src="./images/סט מרוקאי.png" alt="סט ארבעת המינים מרוקאי" class="product-image">
                         </div>
                         <h3>סט מרוקאי</h3>
                         <p>סט שלם ארבעת המינים במנהג מרוקאי מסורתי</p>
@@ -65,7 +107,7 @@
 
                     <article class="product-card ashkenazi-set">
                         <div class="product-image-container">
-                            <img src="https://via.placeholder.com/300x200/f0f8f0/4a7c59?text=סט+אשכנזי" alt="סט ארבעת המינים אשכנזי" class="product-image">
+                            <img src="./images/סט אשכנזי.png" alt="סט ארבעת המינים אשכנזי" class="product-image">
                         </div>
                         <h3>סט אשכנזי</h3>
                         <p>סט שלם ארבעת המינים במנהג אשכנזי מסורתי</p>
@@ -90,7 +132,7 @@
 
                     <article class="product-card yemenite-set">
                         <div class="product-image-container">
-                            <img src="https://via.placeholder.com/300x200/f5f0e8/4a7c59?text=סט+תימני" alt="סט ארבעת המינים תימני" class="product-image">
+                            <img src="./images/סט תימני.png" alt="סט ארבעת המינים תימני" class="product-image">
                         </div>
                         <h3>סט תימני</h3>
                         <p>סט שלם ארבעת המינים במנהג תימני מסורתי</p>
@@ -121,7 +163,7 @@
                         <!-- אתרוג תימני -->
                         <article class="individual-card">
                             <div class="product-image-container">
-                                <img src="https://via.placeholder.com/200x150/fff8e1/4a7c59?text=🍋" alt="אתרוג תימני" class="product-image">
+                                <img src="./images/אתרוג תימני.png" alt="אתרוג תימני" class="product-image">
                             </div>
                             <h4>אתרוג תימני</h4>
                             <div class="product-options-inline">
@@ -146,7 +188,7 @@
                         <!-- אתרוג אשכנזי -->
                         <article class="individual-card">
                             <div class="product-image-container">
-                                <img src="https://via.placeholder.com/200x150/fff8e1/4a7c59?text=🍋" alt="אתרוג אשכנזי" class="product-image">
+                                <img src="./images/אתרוג אשכנזי.png" alt="אתרוג אשכנזי" class="product-image">
                             </div>
                             <h4>אתרוג אשכנזי</h4>
                             <div class="product-options-inline">
@@ -171,7 +213,7 @@
                         <!-- אתרוג מרוקאי -->
                         <article class="individual-card">
                             <div class="product-image-container">
-                                <img src="https://via.placeholder.com/200x150/fff8e1/4a7c59?text=🍋" alt="אתרוג מרוקאי" class="product-image">
+                                <img src="./images/אתרוג מרוקאי.png" alt="אתרוג מרוקאי" class="product-image">
                             </div>
                             <h4>אתרוג מרוקאי</h4>
                             <div class="product-options-inline">
@@ -196,7 +238,7 @@
                         <!-- לולב -->
                         <article class="individual-card">
                             <div class="product-image-container">
-                                <img src="https://via.placeholder.com/200x150/e8f5e8/4a7c59?text=🌿" alt="לולב" class="product-image">
+                                <img src="./images/לולב.png" alt="לולב" class="product-image">
                             </div>
                             <h4>לולב</h4>
                             <div class="product-options-inline">
@@ -217,7 +259,7 @@
                         <!-- הדס -->
                         <article class="individual-card">
                             <div class="product-image-container">
-                                <img src="https://via.placeholder.com/200x150/f0f8f0/4a7c59?text=🌱" alt="הדס" class="product-image">
+                                <img src="./images/הדס .png" alt="הדס" class="product-image">
                             </div>
                             <h4>הדס</h4>
                             <div class="product-options-inline">
@@ -242,7 +284,7 @@
                         <!-- ערבה -->
                         <article class="individual-card">
                             <div class="product-image-container">
-                                <img src="https://via.placeholder.com/200x150/f5f5f5/4a7c59?text=🍃" alt="ערבה" class="product-image">
+                                <img src="./images/ערבה.png" alt="ערבה" class="product-image">
                             </div>
                             <h4>ערבה</h4>
                             <div class="product-options-inline">
@@ -273,6 +315,14 @@
                             </div>
                         </article>
                     </div>
+                </div>
+
+                <!-- הערה על התמונות -->
+                <div class="images-disclaimer" role="note" aria-label="הערה על התמונות">
+                    <p class="disclaimer-text">
+                        <span class="disclaimer-icon" aria-hidden="true">📷</span>
+                        התמונות להמחשה בלבד
+                    </p>
                 </div>
             </div>
         </section>
@@ -341,13 +391,13 @@
 
                     <div class="form-group">
                         <label for="phone" class="required">טלפון *</label>
-                        <input type="tel" id="phone" name="phone" required aria-describedby="phone-error" placeholder="050-123-4567" autocomplete="tel">
+                        <input type="tel" id="phone" name="phone" required aria-describedby="phone-error" placeholder="052-505-5318" autocomplete="tel">
                         <span id="phone-error" class="error-message" role="alert" aria-live="polite"></span>
                     </div>
 
                     <div class="form-group">
                         <label for="email">אימייל</label>
-                        <input type="email" id="email" name="email" aria-describedby="email-error" placeholder="example@email.com" autocomplete="email">
+                        <input type="email" id="email" name="email" aria-describedby="email-error" placeholder="aravothdarom@gmail.com" autocomplete="email">
                         <span id="email-error" class="error-message" role="alert" aria-live="polite"></span>
                     </div>
 
@@ -440,8 +490,8 @@
             <h3>יצירת קשר לבעיות נגישות</h3>
             <p>אם נתקלתם בבעיית נגישות באתר, אנא צרו קשר:</p>
             <ul>
-                <li><strong>טלפון:</strong> <a href="tel:050-123-4567">050-123-4567</a></li>
-                <li><strong>אימייל:</strong> <a href="mailto:accessibility@4minim.co.il">accessibility@4minim.co.il</a></li>
+                <li><strong>טלפון:</strong> <a href="tel:0525055318">052-505-5318</a></li>
+                <li><strong>אימייל:</strong> <a href="mailto:aravothdarom@gmail.com">aravothdarom@gmail.com</a></li>
             </ul>
 
             <p><strong>אנו מתחייבים לטפל בפניות בתוך 60 יום כנדרש בחוק.</strong></p>
@@ -455,8 +505,8 @@
     <footer role="contentinfo">
         <div class="container">
             <p>&copy; 2025 ארבעת המינים לחג הסוכות. כל הזכויות שמורות.</p>
-            <p>לשאלות ופניות: <a href="tel:+972-50-123-4567">050-123-4567</a> | <a href="mailto:info@4minim.co.il">info@4minim.co.il</a></p>
-            <p><a href="#accessibility-statement">הצהרת נגישות</a> | <a href="mailto:accessibility@4minim.co.il">דיווח על בעיית נגישות</a></p>
+            <p>לשאלות ופניות: <a href="tel:0525055318">052-505-5318</a> | <a href="mailto:aravothdarom@gmail.com">aravothdarom@gmail.com</a></p>
+            <p><a href="#accessibility-statement">הצהרת נגישות</a> | <a href="mailto:aravothdarom@gmail.com">דיווח על בעיית נגישות</a></p>
         </div>
     </footer>
 
@@ -620,8 +670,8 @@
                     <h4>9. יצירת קשר</h4>
                     <p>לשאלות או בקשות בנוגע למדיניות הפרטיות, ניתן ליצור קשר:</p>
                     <ul>
-                        <li>טלפון: [0525055318]</li>
-                        <li>דוא"ל: [aravothdarom@gmail.com]</li>
+                        <li>טלפון: 052-505-5318</li>
+                        <li>דוא"ל: aravothdarom@gmail.com</li>
                     </ul>
 
                     <h4>10. עדכון המדיניות</h4>

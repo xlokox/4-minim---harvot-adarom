@@ -63,27 +63,332 @@ header h1 {
     opacity: 0.9;
 }
 
-/* Hero section */
-.hero {
-    background: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23e8f5e8" opacity="0.3"/><circle cx="75" cy="75" r="1" fill="%23e8f5e8" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    padding: 4rem 0;
-    text-align: center;
+/* Hero Section - New Design */
+.hero-section {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
 }
 
-.hero h2 {
-    font-size: 2.2rem;
-    color: #2c5530;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: brightness(0.7) saturate(1.2);
+    animation: slowZoom 20s ease-in-out infinite alternate;
+}
+
+@keyframes slowZoom {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(44, 85, 48, 0.8) 0%,
+        rgba(74, 124, 89, 0.6) 50%,
+        rgba(139, 195, 74, 0.4) 100%
+    );
+    backdrop-filter: blur(1px);
+}
+
+/* Floating Elements Animation */
+.floating-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.floating-element {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.6;
+    animation: float 6s ease-in-out infinite;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+}
+
+.floating-element.element-1 {
+    top: 20%;
+    right: 15%;
+    animation-delay: 0s;
+}
+
+.floating-element.element-2 {
+    top: 60%;
+    right: 80%;
+    animation-delay: 1.5s;
+}
+
+.floating-element.element-3 {
+    top: 30%;
+    right: 70%;
+    animation-delay: 3s;
+}
+
+.floating-element.element-4 {
+    top: 70%;
+    right: 20%;
+    animation-delay: 4.5s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-20px) rotate(5deg);
+        opacity: 0.8;
+    }
+}
+
+/* Hero Content */
+.hero-content {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    text-align: center;
+    color: white;
+}
+
+.hero-text-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-main-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+    line-height: 1.2;
+}
+
+.title-line {
+    display: block;
+    animation: slideInRight 1s ease-out;
+}
+
+.title-line:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Biblical Quote */
+.biblical-quote {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    border-right: 4px solid #8bc34a;
+    animation: fadeIn 1s ease-out 0.6s both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.quote-text {
+    font-size: 1.3rem;
+    font-style: italic;
+    line-height: 1.8;
+    margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.quote-source {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 500;
 }
 
 .hero-description {
-    font-size: 1.1rem;
-    max-width: 800px;
-    margin: 0 auto;
-    color: #555;
+    font-size: 1.2rem;
     line-height: 1.8;
+    margin: 2rem 0;
+    opacity: 0.95;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    animation: fadeIn 1s ease-out 0.9s both;
+}
+
+/* Hero CTA Buttons */
+.hero-cta {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeInUp 1s ease-out 1.2s both;
+}
+
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.cta-button:hover::before {
+    left: 100%;
+}
+
+.cta-button.primary {
+    background: linear-gradient(135deg, #8bc34a, #689f38);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 195, 74, 0.4);
+}
+
+.cta-button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 195, 74, 0.6);
+}
+
+.cta-button.secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.cta-button.secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.cta-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.cta-button:hover .cta-icon {
+    transform: scale(1.2);
+}
+
+/* Responsive Design for Hero */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 80vh;
+    }
+
+    .hero-main-title {
+        font-size: 2.5rem;
+    }
+
+    .quote-text {
+        font-size: 1.1rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .hero-cta {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cta-button {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+
+    .floating-element {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-main-title {
+        font-size: 2rem;
+    }
+
+    .hero-text-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .quote-text {
+        font-size: 1rem;
+    }
 }
 
 /* Products section */
@@ -127,23 +432,49 @@ header h1 {
 }
 
 .product-image {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #666;
-    font-size: 0.9rem;
-    border: 2px solid #e0e0e0;
-    transition: border-color 0.3s ease;
+    border-radius: 15px;
+    border: none;
+    transition: all 0.3s ease;
+    filter: brightness(1.05) saturate(1.1);
+}
+
+/* Special styling for etrog images */
+.product-image[alt*="אתרוג"] {
+    object-position: center;
+    filter: brightness(1.15) saturate(1.3) contrast(1.1);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+    border-color: #ffc107;
+}
+
+.product-image[alt*="אתרוג"]:hover {
+    filter: brightness(1.2) saturate(1.4) contrast(1.15);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
+    border-color: #ff9800;
+    transform: scale(1.02);
+}
+
+/* מיקום מדויק לכל תמונה */
+.product-card:nth-child(1) .product-image {
+    object-position: 85% center;
+}
+
+.product-card:nth-child(2) .product-image {
+    object-position: center center;
+}
+
+.product-card:nth-child(3) .product-image {
+    object-position: center center;
 }
 
 .product-image:hover {
-    border-color: #4a7c59;
+    transform: scale(1.02);
+    filter: brightness(1.1) saturate(1.2);
 }
 
 /* Fallback for missing images */
@@ -293,10 +624,58 @@ header h1 {
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: #f8f9fa;
 }
 
-.product-card:hover .product-image {
-    transform: scale(1.05);
+
+
+/* Images Disclaimer */
+.images-disclaimer {
+    margin-top: 3rem;
+    padding: 1rem;
+    text-align: center;
+    background: rgba(108, 117, 125, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.disclaimer-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-style: italic;
+}
+
+.disclaimer-icon {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+/* Accessibility improvements for disclaimer */
+@media (prefers-reduced-motion: reduce) {
+    .disclaimer-text {
+        animation: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .images-disclaimer {
+        margin-top: 2rem;
+        padding: 0.8rem;
+    }
+
+    .disclaimer-text {
+        font-size: 0.85rem;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
 }
 
 /* Individual Products Section */

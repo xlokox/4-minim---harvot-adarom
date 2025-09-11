@@ -13,7 +13,7 @@ const validationRules = {
     phone: {
         required: true,
         pattern: /^0\d{1,2}-?\d{7}$|^0\d{9}$/,
-        message: 'נא להזין מספר טלפון תקין (לדוגמה: 050-123-4567)'
+        message: 'נא להזין מספר טלפון תקין (לדוגמה: 052-505-5318)'
     },
     email: {
         required: false,
@@ -1029,8 +1029,31 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(showCookieBanner, 1000);
 });
 
+// Hero Section Navigation Functions
+function scrollToProducts() {
+    const productsSection = document.querySelector('.products');
+    if (productsSection) {
+        productsSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+function scrollToForm() {
+    const formSection = document.querySelector('.order-form');
+    if (formSection) {
+        formSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
 // Make functions globally available
 window.openTermsModal = openTermsModal;
 window.closeTermsModal = closeTermsModal;
 window.acceptCookies = acceptCookies;
 window.declineCookies = declineCookies;
+window.scrollToProducts = scrollToProducts;
+window.scrollToForm = scrollToForm;
