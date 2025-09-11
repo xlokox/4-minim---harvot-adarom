@@ -62,12 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeForm() {
-    // Set focus on first input for better accessibility
-    const firstInput = orderForm.querySelector('input[type="text"]');
-    if (firstInput) {
-        firstInput.focus();
-    }
-    
+    // Initialize form-related functionality
+    // Removed auto-focus to prevent automatic scrolling to form
+
     // Cart system is now initialized
 }
 
