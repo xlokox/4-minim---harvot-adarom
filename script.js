@@ -68,8 +68,7 @@ function initializeForm() {
         firstInput.focus();
     }
     
-    // Initialize custom quantity visibility
-    toggleCustomQuantity();
+    // Cart system is now initialized
 }
 
 function setupEventListeners() {

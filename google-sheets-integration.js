@@ -158,11 +158,27 @@ async function sendWithRetry(data, attempt = 1) {
         console.log(`📤 Sending data (attempt ${attempt}):`, data);
         console.log(`🎯 Target URL: ${GOOGLE_SHEETS_CONFIG.webAppUrl}`);
 
-        // Use JSONP approach by creating a form and submitting it
-        console.log('🔄 Calling sendViaForm...');
-        const result = await sendViaForm(data);
-        console.log('📥 sendViaForm result:', result);
-        return result;
+        // Simple fetch approach with no-cors
+        const formData = new FormData();
+        for (const [key, value] of Object.entries(data)) {
+            formData.append(key, String(value || ''));
+        }
+
+        console.log('🔄 Sending via fetch with no-cors...');
+
+        await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl, {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors' // This bypasses CORS but we can't read the response
+        });
+
+        console.log('📥 Fetch completed (no-cors mode)');
+
+        // In no-cors mode, we can't read the response, but if no error was thrown, assume success
+        return {
+            success: true,
+            message: 'ההזמנה נשלחה בהצלחה'
+        };
 
     } catch (error) {
         console.error(`❌ Attempt ${attempt} failed:`, error);
