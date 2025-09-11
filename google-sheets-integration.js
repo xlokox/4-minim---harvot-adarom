@@ -84,20 +84,113 @@ function prepareDataForSheets(formData) {
     // Debug: Log received form data
     console.log('Preparing data for sheets:', formData);
 
-    // Simple data first - let's see what's causing the error
+    // Parse cart items if they exist
+    let cartItems = [];
+    let detailedOrderSummary = '';
+    let productBreakdown = {
+        sets: [],
+        etrogim: [],
+        lulav: 0,
+        hadas: 0,
+        arava: 0
+    };
+
+    try {
+        if (formData.cartItems && typeof formData.cartItems === 'string') {
+            const parsedCart = JSON.parse(formData.cartItems);
+            cartItems = parsedCart.items || [];
+        } else if (formData.cartItems && formData.cartItems.items) {
+            cartItems = formData.cartItems.items;
+        }
+
+        // Process each cart item for detailed breakdown
+        cartItems.forEach(item => {
+            const productName = item.productName || '';
+            const kashrutText = item.kashrutText || '';
+            const quantity = item.quantity || 0;
+            const totalPrice = item.totalPrice || 0;
+
+            // Add to detailed summary
+            detailedOrderSummary += `${productName} - ${kashrutText} × ${quantity} = ${totalPrice}₪\n`;
+
+            // Categorize products for breakdown
+            if (productName.includes('סט')) {
+                let setType = '';
+                if (productName.includes('תימני')) setType = 'תימני';
+                else if (productName.includes('מרוקאי')) setType = 'מרוקאי';
+                else if (productName.includes('אשכנזי')) setType = 'אשכנזי';
+
+                productBreakdown.sets.push({
+                    type: setType,
+                    kashrut: kashrutText,
+                    quantity: quantity,
+                    price: totalPrice
+                });
+            } else if (productName.includes('אתרוג')) {
+                let etrogType = '';
+                if (productName.includes('תימני')) etrogType = 'תימני';
+                else if (productName.includes('מרוקאי')) etrogType = 'מרוקאי';
+                else if (productName.includes('אשכנזי')) etrogType = 'אשכנזי';
+
+                productBreakdown.etrogim.push({
+                    type: etrogType,
+                    kashrut: kashrutText,
+                    quantity: quantity,
+                    price: totalPrice
+                });
+            } else if (productName.includes('לולב')) {
+                productBreakdown.lulav += quantity;
+            } else if (productName.includes('הדס')) {
+                productBreakdown.hadas += quantity;
+            } else if (productName.includes('ערבה')) {
+                productBreakdown.arava += quantity;
+            }
+        });
+    } catch (error) {
+        console.error('Error parsing cart items:', error);
+        detailedOrderSummary = 'שגיאה בפענוח פרטי ההזמנה';
+    }
+
+    // Create summary strings for Google Sheets
+    const setsOrderSummary = productBreakdown.sets.map(set =>
+        `${set.type} (${set.kashrut}) × ${set.quantity}`
+    ).join(', ') || 'לא הוזמנו סטים';
+
+    const etrogimOrderSummary = productBreakdown.etrogim.map(etrog =>
+        `${etrog.type} (${etrog.kashrut}) × ${etrog.quantity}`
+    ).join(', ') || 'לא הוזמנו אתרוגים';
+
+    const individualItemsSummary = [
+        productBreakdown.lulav > 0 ? `לולב × ${productBreakdown.lulav}` : '',
+        productBreakdown.hadas > 0 ? `הדס × ${productBreakdown.hadas}` : '',
+        productBreakdown.arava > 0 ? `ערבה × ${productBreakdown.arava}` : ''
+    ].filter(item => item).join(', ') || 'לא הוזמנו פריטים בודדים';
+
     const preparedData = {
         timestamp: new Date().toISOString(),
-        fullName: String(formData.fullName || 'טסט'),
-        phone: String(formData.phone || '0501234567'),
-        email: String(formData.email || 'test@test.com'),
-        city: String(formData.city || 'עיר טסט'),
-        address: String(formData.address || 'כתובת טסט'),
-        package: String(formData.package || 'basic'),
-        quantity: String(formData.quantity || '1'),
+        orderNumber: generateOrderNumber(),
+        fullName: String(formData.fullName || ''),
+        phone: String(formData.phone || ''),
+        email: String(formData.email || ''),
+        city: String(formData.city || ''),
+        address: String(formData.address || ''),
+        needsShipping: formData.needsShipping ? 'כן' : 'לא',
         notes: String(formData.notes || ''),
-        terms: String(formData.terms || 'on'),
-        contactApproval: String(formData.contactApproval || 'on'),
-        totalPrice: String(formData.totalPrice || '120')
+        terms: formData.terms ? 'מאושר' : 'לא מאושר',
+        contactApproval: formData.contactApproval ? 'מאושר' : 'לא מאושר',
+        totalPrice: String(formData.totalPrice || '0'),
+        totalItems: cartItems.length,
+        detailedOrderSummary: detailedOrderSummary.trim(),
+        setsOrdered: setsOrderSummary,
+        etrogimOrdered: etrogimOrderSummary,
+        individualItemsOrdered: individualItemsSummary,
+        hasTimaniSet: productBreakdown.sets.some(s => s.type === 'תימני') ? 'כן' : 'לא',
+        hasMoroccanSet: productBreakdown.sets.some(s => s.type === 'מרוקאי') ? 'כן' : 'לא',
+        hasAshkenaziSet: productBreakdown.sets.some(s => s.type === 'אשכנזי') ? 'כן' : 'לא',
+        hasEtrogim: productBreakdown.etrogim.length > 0 ? 'כן' : 'לא',
+        hasLulav: productBreakdown.lulav > 0 ? 'כן' : 'לא',
+        hasHadas: productBreakdown.hadas > 0 ? 'כן' : 'לא',
+        hasArava: productBreakdown.arava > 0 ? 'כן' : 'לא'
     };
 
     // Debug: Log prepared data

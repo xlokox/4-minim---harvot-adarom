@@ -1571,6 +1571,14 @@ fieldset legend {
     transform: translateY(0);
 }
 
+.shipping-note {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #4a7c59;
+    text-align: center;
+    font-weight: 500;
+}
+
 .submit-info {
     margin-top: 1rem;
     font-size: 0.9rem;

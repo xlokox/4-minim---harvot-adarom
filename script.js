@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     setupEventListeners();
     setupAccessibility();
+    setupShippingCheckbox();
 });
 
 function initializeForm() {
@@ -90,12 +91,42 @@ function setupAccessibility() {
     radioGroups.forEach(radio => {
         radio.addEventListener('keydown', handleRadioKeydown);
     });
-    
+
     // Announce form errors to screen readers
     const errorMessages = orderForm.querySelectorAll('.error-message');
     errorMessages.forEach(error => {
         error.setAttribute('aria-live', 'polite');
     });
+}
+
+function setupShippingCheckbox() {
+    const shippingCheckbox = document.getElementById('needsShipping');
+    const addressField = document.getElementById('address');
+    const addressLabel = document.querySelector('label[for="address"]');
+
+    if (shippingCheckbox && addressField && addressLabel) {
+        shippingCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Enable address field and make it required
+                addressField.disabled = false;
+                addressField.required = true;
+                addressLabel.innerHTML = 'כתובת מגורים <span class="required-asterisk">*</span>';
+                addressLabel.classList.add('required');
+            } else {
+                // Disable address field and make it optional
+                addressField.disabled = true;
+                addressField.required = false;
+                addressField.value = ''; // Clear the field
+                addressLabel.innerHTML = 'כתובת מגורים';
+                addressLabel.classList.remove('required');
+                // Clear any error message
+                const errorElement = document.getElementById('address-error');
+                if (errorElement) {
+                    errorElement.textContent = '';
+                }
+            }
+        });
+    }
 }
 
 function handleRadioKeydown(event) {
@@ -170,11 +201,19 @@ function validateForm() {
 
 function validateField(field) {
     if (!field) return true;
-    
+
     const fieldName = field.name || field.id;
     const rule = validationRules[fieldName];
-    
+
     if (!rule) return true;
+
+    // Special handling for address field - only required if shipping is selected
+    if (fieldName === 'address') {
+        const shippingCheckbox = document.getElementById('needsShipping');
+        if (!shippingCheckbox || !shippingCheckbox.checked) {
+            return true; // Address is not required if shipping is not selected
+        }
+    }
     
     const value = field.type === 'checkbox' ? field.checked : 
                   field.type === 'radio' ? orderForm.querySelector(`input[name="${fieldName}"]:checked`)?.value :

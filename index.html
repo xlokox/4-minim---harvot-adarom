@@ -408,9 +408,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="address" class="required">כתובת מגורים *</label>
-                        <textarea id="address" name="address" required aria-describedby="address-error" rows="2" placeholder="רחוב, מספר בית" autocomplete="street-address"></textarea>
+                        <label for="address">כתובת מגורים</label>
+                        <textarea id="address" name="address" aria-describedby="address-error" rows="2" placeholder="רחוב, מספר בית" autocomplete="street-address" disabled></textarea>
                         <span id="address-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="needsShipping" name="needsShipping">
+                        <label for="needsShipping">מעוניין במשלוח</label>
                     </div>
 
                     <!-- Cart summary will be displayed here automatically -->
@@ -446,6 +451,7 @@
                             <span class="submit-text">שלח הזמנה</span>
                             <span class="submit-price" id="submitPrice" style="display: none;"></span>
                         </button>
+                        <p class="shipping-note">המחיר לא כולל משלוח. במידה ומעוניין במשלוח, אנא סמן את התיבה למעלה.</p>
                     </div>
                 </form>
 

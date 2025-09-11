@@ -19,9 +19,12 @@ const CONFIG = {
   SPREADSHEET_ID: '1FHqjKrUPKvKwV_OlPpeEZB-N0CUgt__oTCdCZhtvp0g',
   SHEET_NAME: 'הזמנות',
   HEADERS: [
-    'תאריך ושעה', 'שם מלא', 'טלפון', 'אימייל', 'עיר מגורים', 
-    'כתובת מגורים', 'פריטים בהזמנה', 'מחיר כולל', 'הערות', 
-    'תנאי שימוש', 'אישור יצירת קשר', 'סטטוס', 'מספר הזמנה'
+    'תאריך ושעה', 'מספר הזמנה', 'שם מלא', 'טלפון', 'אימייל',
+    'עיר מגורים', 'כתובת מגורים', 'משלוח נדרש', 'מחיר כולל',
+    'כמות פריטים', 'פירוט מלא', 'סטים שהוזמנו', 'אתרוגים שהוזמנו',
+    'פריטים בודדים', 'סט תימני', 'סט מרוקאי', 'סט אשכנזי',
+    'אתרוגים', 'לולב', 'הדס', 'ערבה', 'הערות',
+    'תנאי שימוש', 'אישור יצירת קשר', 'סטטוס'
   ]
 };
 
@@ -64,51 +67,48 @@ function addOrderToSheet(data) {
   try {
     const spreadsheet = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
     let sheet = spreadsheet.getSheetByName(CONFIG.SHEET_NAME);
-    
+
     if (!sheet) {
       sheet = spreadsheet.insertSheet(CONFIG.SHEET_NAME);
       sheet.getRange(1, 1, 1, CONFIG.HEADERS.length).setValues([CONFIG.HEADERS]);
       sheet.getRange(1, 1, 1, CONFIG.HEADERS.length).setFontWeight('bold');
+      // Auto-resize columns
+      sheet.autoResizeColumns(1, CONFIG.HEADERS.length);
     }
-    
-    const orderNumber = generateOrderNumber();
-    
-    // Parse cart items
-    let cartItemsText = '';
-    if (data.cartItems) {
-      try {
-        const cartItems = typeof data.cartItems === 'string' ? JSON.parse(data.cartItems) : data.cartItems;
-        if (cartItems && cartItems.items && Array.isArray(cartItems.items)) {
-          cartItemsText = cartItems.items.map(item => 
-            `${item.name} (${item.kashrut}) - כמות: ${item.quantity} - מחיר: ${item.price}₪`
-          ).join('\n');
-        }
-      } catch (e) {
-        cartItemsText = data.cartItems.toString();
-      }
-    }
-    
+
     const rowData = [
-      new Date().toLocaleString('he-IL'),
-      data.fullName || '',
-      data.phone || '',
-      data.email || '',
-      data.city || '',
-      data.address || '',
-      cartItemsText,
-      data.totalPrice || '0',
-      data.notes || '',
-      data.terms === 'on' ? 'מאושר' : 'לא מאושר',
-      data.contactApproval === 'on' ? 'מאושר' : 'לא מאושר',
-      'חדש',
-      orderNumber
+      new Date().toLocaleString('he-IL'),                    // תאריך ושעה
+      data.orderNumber || generateOrderNumber(),             // מספר הזמנה
+      data.fullName || '',                                   // שם מלא
+      data.phone || '',                                      // טלפון
+      data.email || '',                                      // אימייל
+      data.city || '',                                       // עיר מגורים
+      data.address || '',                                    // כתובת מגורים
+      data.needsShipping || 'לא',                           // משלוח נדרש
+      data.totalPrice || '0',                               // מחיר כולל
+      data.totalItems || '0',                               // כמות פריטים
+      data.detailedOrderSummary || '',                      // פירוט מלא
+      data.setsOrdered || '',                               // סטים שהוזמנו
+      data.etrogimOrdered || '',                            // אתרוגים שהוזמנו
+      data.individualItemsOrdered || '',                    // פריטים בודדים
+      data.hasTimaniSet || 'לא',                           // סט תימני
+      data.hasMoroccanSet || 'לא',                         // סט מרוקאי
+      data.hasAshkenaziSet || 'לא',                        // סט אשכנזי
+      data.hasEtrogim || 'לא',                             // אתרוגים
+      data.hasLulav || 'לא',                               // לולב
+      data.hasHadas || 'לא',                               // הדס
+      data.hasArava || 'לא',                               // ערבה
+      data.notes || '',                                     // הערות
+      data.terms || 'לא מאושר',                           // תנאי שימוש
+      data.contactApproval || 'לא מאושר',                 // אישור יצירת קשר
+      'חדש'                                                 // סטטוס
     ];
-    
+
     sheet.appendRow(rowData);
-    console.log('✅ Order added successfully:', orderNumber);
-    
-    return { success: true, orderNumber: orderNumber };
-    
+    console.log('✅ Order added successfully:', data.orderNumber || 'NEW');
+
+    return { success: true, orderNumber: data.orderNumber || generateOrderNumber() };
+
   } catch (error) {
     console.error('❌ Error adding order to sheet:', error);
     return { success: false, error: error.toString() };
