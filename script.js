@@ -506,19 +506,19 @@ window.addEventListener('beforeunload', function() {
 const productPricing = {
     // Sets
     'set-moroccan': {
-        kosher: 118,
-        mehadrin: 158,
-        mehadrin_plus: 191
+        kosher: 125,
+        mehadrin: 165,
+        mehadrin_plus: 195
     },
     'set-ashkenazi': {
-        kosher: 94,
-        mehadrin: 114,
-        mehadrin_plus: 127
+        kosher: 100,
+        mehadrin: 120,
+        mehadrin_plus: 135
     },
     'set-yemenite': {
-        kosher: 110,
-        mehadrin: 150,
-        mehadrin_plus: 180
+        kosher: 115,
+        mehadrin: 155,
+        mehadrin_plus: 185
     },
     // Individual items
     'etrog-yemenite': {
