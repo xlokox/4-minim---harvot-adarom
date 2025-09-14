@@ -26,7 +26,7 @@ const validationRules = {
         message: 'נא להזין שם עיר (לפחות 2 תווים)'
     },
     address: {
-        required: true,
+        required: false, // Will be set to true dynamically if shipping is needed
         minLength: 5,
         message: 'נא להזין כתובת מלאה (לפחות 5 תווים)'
     },
@@ -110,12 +110,14 @@ function setupShippingCheckbox() {
                 // Enable address field and make it required
                 addressField.disabled = false;
                 addressField.required = true;
+                validationRules.address.required = true; // Update validation rules
                 addressLabel.innerHTML = 'כתובת מגורים <span class="required-asterisk">*</span>';
                 addressLabel.classList.add('required');
             } else {
                 // Disable address field and make it optional
                 addressField.disabled = true;
                 addressField.required = false;
+                validationRules.address.required = false; // Update validation rules
                 addressField.value = ''; // Clear the field
                 addressLabel.innerHTML = 'כתובת מגורים';
                 addressLabel.classList.remove('required');
@@ -155,16 +157,21 @@ function handleRadioKeydown(event) {
 
 function handleFormSubmit(event) {
     event.preventDefault();
-    
+    console.log('🚀 Form submit started');
+
     // Validate entire form
     const isValid = validateForm();
-    
+    console.log('📋 Form validation result:', isValid);
+
     if (isValid) {
+        console.log('✅ Form is valid, proceeding to submit');
         submitForm();
     } else {
+        console.log('❌ Form validation failed');
         // Focus on first error field
         const firstError = orderForm.querySelector('.error-message:not(:empty)');
         if (firstError) {
+            console.log('🎯 Focusing on first error:', firstError.textContent);
             const fieldId = firstError.id.replace('-error', '');
             const field = document.getElementById(fieldId);
             if (field) {
@@ -175,18 +182,43 @@ function handleFormSubmit(event) {
 }
 
 function validateForm() {
+    console.log('🔍 Starting form validation');
     let isValid = true;
-    
-    // Validate all fields
-    const fields = ['fullName', 'phone', 'email', 'city', 'address', 'quantity', 'terms', 'contactApproval'];
-    
-    fields.forEach(fieldName => {
-        const field = document.getElementById(fieldName) || 
+
+    // Validate basic required fields
+    const basicFields = ['fullName', 'phone', 'email', 'city', 'terms', 'contactApproval'];
+    console.log('📝 Validating basic fields:', basicFields);
+
+    basicFields.forEach(fieldName => {
+        const field = document.getElementById(fieldName) ||
                      orderForm.querySelector(`input[name="${fieldName}"]`);
-        if (field && !validateField(field)) {
+        if (field) {
+            const fieldValid = validateField(field);
+            console.log(`  ${fieldName}: ${fieldValid ? '✅' : '❌'}`);
+            if (!fieldValid) {
+                isValid = false;
+            }
+        } else {
+            console.log(`  ${fieldName}: ❌ Field not found`);
             isValid = false;
         }
     });
+
+    // Validate address only if shipping is needed
+    const shippingCheckbox = document.getElementById('needsShipping');
+    console.log('📦 Shipping checkbox checked:', shippingCheckbox?.checked);
+    if (shippingCheckbox && shippingCheckbox.checked) {
+        const addressField = document.getElementById('address');
+        if (addressField) {
+            const addressValid = validateField(addressField);
+            console.log(`  address (shipping required): ${addressValid ? '✅' : '❌'}`);
+            if (!addressValid) {
+                isValid = false;
+            }
+        }
+    } else {
+        console.log('  address: ⏭️ Skipped (shipping not needed)');
+    }
     
     // Validate package selection
     const packageField = orderForm.querySelector('input[name="package"]:checked');
@@ -211,6 +243,11 @@ function validateField(field) {
     if (fieldName === 'address') {
         const shippingCheckbox = document.getElementById('needsShipping');
         if (!shippingCheckbox || !shippingCheckbox.checked) {
+            // Clear any error for address field when shipping is not needed
+            const errorElement = document.getElementById('address-error');
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
             return true; // Address is not required if shipping is not selected
         }
     }
@@ -299,7 +336,7 @@ async function submitForm() {
 
     // Collect form data
     const formData = new FormData(orderForm);
-    const data = {};
+    let data = {};
 
     // Convert FormData to object - ensure all form fields are captured
     for (let [key, value] of formData.entries()) {
@@ -320,8 +357,14 @@ async function submitForm() {
     delete data.cartData;
 
     // Ensure all required fields are present (updated for new form structure)
-    const requiredFields = ['fullName', 'phone', 'city', 'address', 'terms', 'contactApproval'];
-    const missingFields = requiredFields.filter(field => !data[field]);
+    const basicRequiredFields = ['fullName', 'phone', 'city', 'terms', 'contactApproval'];
+    let missingFields = basicRequiredFields.filter(field => !data[field]);
+
+    // Add address to required fields only if shipping is needed
+    const shippingCheckbox = document.getElementById('needsShipping');
+    if (shippingCheckbox && shippingCheckbox.checked && !data.address) {
+        missingFields.push('address');
+    }
 
     if (missingFields.length > 0) {
         console.warn('Missing required fields:', missingFields);
@@ -365,6 +408,7 @@ async function submitForm() {
 
         if (window.GoogleSheetsIntegration) {
             console.log('🚀 Sending to Google Sheets...');
+            console.log('📤 Data being sent:', JSON.stringify(data, null, 2));
             sheetsResult = await window.GoogleSheetsIntegration.sendToGoogleSheets(data);
             console.log('📊 Google Sheets result:', sheetsResult);
         } else {
@@ -1113,6 +1157,8 @@ function addDetailedProductBreakdown(data) {
             const quantity = item.quantity || 0;
             const totalPrice = item.totalPrice || 0;
 
+            console.log('Processing cart item:', { productName, kashrutText, quantity, totalPrice });
+
             // Add to detailed summary
             detailedOrderSummary += `${productName} - ${kashrutText} × ${quantity} = ${totalPrice}₪\n`;
 
@@ -1123,6 +1169,7 @@ function addDetailedProductBreakdown(data) {
                 else if (productName.includes('מרוקאי')) setType = 'מרוקאי';
                 else if (productName.includes('אשכנזי')) setType = 'אשכנזי';
 
+                console.log('Adding set:', { setType, kashrutText, quantity, totalPrice });
                 productBreakdown.sets.push({
                     type: setType,
                     kashrut: kashrutText,
@@ -1135,6 +1182,7 @@ function addDetailedProductBreakdown(data) {
                 else if (productName.includes('מרוקאי')) etrogType = 'מרוקאי';
                 else if (productName.includes('אשכנזי')) etrogType = 'אשכנזי';
 
+                console.log('Adding etrog:', { etrogType, kashrutText, quantity, totalPrice });
                 productBreakdown.etrogim.push({
                     type: etrogType,
                     kashrut: kashrutText,
@@ -1142,11 +1190,16 @@ function addDetailedProductBreakdown(data) {
                     price: totalPrice
                 });
             } else if (productName.includes('לולב')) {
+                console.log('Adding lulav:', quantity);
                 productBreakdown.lulav += quantity;
             } else if (productName.includes('הדס')) {
+                console.log('Adding hadas:', quantity);
                 productBreakdown.hadas += quantity;
             } else if (productName.includes('ערבה')) {
+                console.log('Adding arava:', quantity);
                 productBreakdown.arava += quantity;
+            } else {
+                console.log('Unknown product type:', productName);
             }
         });
     } catch (error) {

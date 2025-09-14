@@ -5,8 +5,8 @@
 
 // Configuration - Uses global CONFIG from config.js
 const GOOGLE_SHEETS_CONFIG = {
-    // Your Google Apps Script Web App URL - Uses CONFIG
-    webAppUrl: window.CONFIG?.GOOGLE_SHEETS_WEB_APP_URL || 'https://script.google.com/macros/s/AKfycbyQWQdSCd4TlkgA8dek-Qo1JJEbsS2NcH3597PweTeYVbtrcd9ay7GBuDjJVN1xAnXY/exec',
+    // Your Google Apps Script Web App URL - Uses CONFIG only
+    webAppUrl: window.CONFIG?.GOOGLE_SHEETS_WEB_APP_URL,
 
     // Timeout for requests (in milliseconds)
     timeout: window.CONFIG?.REQUEST_TIMEOUT || 10000,
@@ -18,8 +18,15 @@ const GOOGLE_SHEETS_CONFIG = {
 
 // Check if URL is configured
 function isConfigured() {
-    return GOOGLE_SHEETS_CONFIG.webAppUrl &&
+    console.log('🔧 Checking configuration...');
+    console.log('📍 Current webAppUrl:', GOOGLE_SHEETS_CONFIG.webAppUrl);
+    console.log('🌐 CONFIG object:', window.CONFIG);
+
+    const isValid = GOOGLE_SHEETS_CONFIG.webAppUrl &&
            !GOOGLE_SHEETS_CONFIG.webAppUrl.includes('YOUR_SCRIPT_ID');
+
+    console.log('✅ Configuration valid:', isValid);
+    return isValid;
 }
 
 /**
@@ -94,21 +101,26 @@ function prepareDataForSheets(formData) {
         hadas: 0,
         arava: 0
     };
+    let cartTotalPrice = 0;
 
     try {
         if (formData.cartItems && typeof formData.cartItems === 'string') {
             const parsedCart = JSON.parse(formData.cartItems);
             cartItems = parsedCart.items || [];
+            if (parsedCart.totalPrice) cartTotalPrice = parsedCart.totalPrice;
         } else if (formData.cartItems && formData.cartItems.items) {
             cartItems = formData.cartItems.items;
+            if (formData.cartItems.totalPrice) cartTotalPrice = formData.cartItems.totalPrice;
         }
 
         // Process each cart item for detailed breakdown
         cartItems.forEach(item => {
             const productName = item.productName || '';
-            const kashrutText = item.kashrutText || '';
+            const kashrutText = item.kashrutText || item.kashrut || '';
             const quantity = item.quantity || 0;
-            const totalPrice = item.totalPrice || 0;
+            const unitPrice = item.unitPrice || 0;
+            const totalPrice = item.totalPrice || (unitPrice * quantity) || 0;
+            cartTotalPrice += !isNaN(totalPrice) ? Number(totalPrice) : 0;
 
             // Add to detailed summary
             detailedOrderSummary += `${productName} - ${kashrutText} × ${quantity} = ${totalPrice}₪\n`;
@@ -166,6 +178,19 @@ function prepareDataForSheets(formData) {
         productBreakdown.arava > 0 ? `ערבה × ${productBreakdown.arava}` : ''
     ].filter(item => item).join(', ') || 'לא הוזמנו פריטים בודדים';
 
+    // Build a cartItems payload for Apps Script to parse counts
+    const cartPayload = {
+        items: cartItems.map(it => ({
+            productName: it.productName || '',
+            kashrutText: it.kashrutText || it.kashrut || '',
+            quantity: it.quantity || 0,
+            unitPrice: it.unitPrice || 0,
+            totalPrice: it.totalPrice || ((it.unitPrice || 0) * (it.quantity || 0))
+        })),
+        totalItems: cartItems.length,
+        totalPrice: cartTotalPrice
+    };
+
     const preparedData = {
         timestamp: new Date().toISOString(),
         orderNumber: generateOrderNumber(),
@@ -174,11 +199,11 @@ function prepareDataForSheets(formData) {
         email: String(formData.email || ''),
         city: String(formData.city || ''),
         address: String(formData.address || ''),
-        needsShipping: formData.needsShipping ? 'כן' : 'לא',
+        needsShipping: formData.needsShipping === 'on' ? 'on' : '',
         notes: String(formData.notes || ''),
-        terms: formData.terms ? 'מאושר' : 'לא מאושר',
-        contactApproval: formData.contactApproval ? 'מאושר' : 'לא מאושר',
-        totalPrice: String(formData.totalPrice || '0'),
+        terms: (formData.terms === 'on' || formData.terms === true) ? 'on' : '',
+        contactApproval: (formData.contactApproval === 'on' || formData.contactApproval === true) ? 'on' : '',
+        totalPrice: String(formData.totalPrice || cartTotalPrice || '0'),
         totalItems: cartItems.length,
         detailedOrderSummary: detailedOrderSummary.trim(),
         setsOrdered: setsOrderSummary,
@@ -190,7 +215,8 @@ function prepareDataForSheets(formData) {
         hasEtrogim: productBreakdown.etrogim.length > 0 ? 'כן' : 'לא',
         hasLulav: productBreakdown.lulav > 0 ? 'כן' : 'לא',
         hasHadas: productBreakdown.hadas > 0 ? 'כן' : 'לא',
-        hasArava: productBreakdown.arava > 0 ? 'כן' : 'לא'
+        hasArava: productBreakdown.arava > 0 ? 'כן' : 'לא',
+        cartItems: cartPayload
     };
 
     // Debug: Log prepared data
@@ -251,37 +277,18 @@ async function sendWithRetry(data, attempt = 1) {
         console.log(`📤 Sending data (attempt ${attempt}):`, data);
         console.log(`🎯 Target URL: ${GOOGLE_SHEETS_CONFIG.webAppUrl}`);
 
-        // Simple fetch approach with no-cors
-        const formData = new FormData();
-        for (const [key, value] of Object.entries(data)) {
-            formData.append(key, String(value || ''));
-        }
-
-        console.log('🔄 Sending via fetch with no-cors...');
-
-        await fetch(GOOGLE_SHEETS_CONFIG.webAppUrl, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors' // This bypasses CORS but we can't read the response
-        });
-
-        console.log('📥 Fetch completed (no-cors mode)');
-
-        // In no-cors mode, we can't read the response, but if no error was thrown, assume success
-        return {
-            success: true,
-            message: 'ההזמנה נשלחה בהצלחה'
-        };
+        // Prefer hidden form submission to avoid CORS and authentication redirects
+        console.log('🔄 Calling sendViaForm...');
+        const result = await sendViaForm(data);
+        console.log('📥 sendViaForm result:', result);
+        return result;
 
     } catch (error) {
         console.error(`❌ Attempt ${attempt} failed:`, error);
 
         if (attempt < GOOGLE_SHEETS_CONFIG.maxRetries) {
             console.log(`⏳ Waiting ${GOOGLE_SHEETS_CONFIG.retryDelay * attempt}ms before retry...`);
-            // Wait before retrying
-            await new Promise(resolve =>
-                setTimeout(resolve, GOOGLE_SHEETS_CONFIG.retryDelay * attempt)
-            );
+            await new Promise(resolve => setTimeout(resolve, GOOGLE_SHEETS_CONFIG.retryDelay * attempt));
             return sendWithRetry(data, attempt + 1);
         } else {
             console.error('💥 All retry attempts failed');
@@ -316,7 +323,12 @@ function sendViaForm(data) {
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = key;
-                input.value = value || '';
+                // Stringify objects/arrays to preserve structure for Apps Script
+                if (value !== null && typeof value === 'object') {
+                    input.value = JSON.stringify(value);
+                } else {
+                    input.value = value != null ? String(value) : '';
+                }
                 form.appendChild(input);
             }
 
@@ -425,29 +437,34 @@ async function retryFailedOrders() {
     try {
         const backups = JSON.parse(localStorage.getItem('orderBackups') || '[]');
         const pendingOrders = backups.filter(backup => backup.status === 'pending');
-        
+
         if (pendingOrders.length === 0) {
             return;
         }
-        
+
         console.log(`Found ${pendingOrders.length} pending orders to retry`);
-        
+
         for (const order of pendingOrders) {
             try {
-                const result = await sendToGoogleSheets(order.data);
-                if (result.success) {
-                    // Mark as sent
-                    order.status = 'sent';
-                    order.sentAt = new Date().toISOString();
+                // Send directly without going through sendToGoogleSheets to avoid recursion
+                if (isConfigured()) {
+                    const sheetData = prepareDataForSheets(order.data);
+                    const response = await sendWithRetry(sheetData);
+                    if (response.success) {
+                        // Mark as sent
+                        order.status = 'sent';
+                        order.sentAt = new Date().toISOString();
+                        console.log('✅ Retry successful for order:', order.data.orderNumber);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to retry order:', error);
             }
         }
-        
+
         // Update localStorage
         localStorage.setItem('orderBackups', JSON.stringify(backups));
-        
+
     } catch (error) {
         console.error('Error retrying failed orders:', error);
     }
@@ -457,20 +474,8 @@ async function retryFailedOrders() {
  * Initialize Google Sheets integration
  */
 function initializeGoogleSheetsIntegration() {
-    // Try to send any pending orders when page loads
-    if (navigator.onLine) {
-        retryFailedOrders();
-    }
-    
-    // Retry when connection is restored
-    window.addEventListener('online', retryFailedOrders);
-    
-    // Periodically try to send pending orders
-    setInterval(() => {
-        if (navigator.onLine) {
-            retryFailedOrders();
-        }
-    }, 5 * 60 * 1000); // Every 5 minutes
+    console.log('Google Sheets integration initialized');
+    // Simplified initialization - removed automatic retry to prevent errors
 }
 
 // Initialize when DOM is loaded

@@ -4,9 +4,9 @@
  */
 
 const CONFIG = {
-    // Google Apps Script Web App URL
-    GOOGLE_SHEETS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxQGhldZfLBgJsp8o6386-KfvciLlirF0_7S7xAQl8StJE_RAJDj4ka-Z0wo9ggNNs/exec',
-    
+    // Google Apps Script Web App URL - UPDATED!
+    GOOGLE_SHEETS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycby9FjEUROvE3StSvcMRTVI9pk9Q3vKhxq9WyMdt7fgYPOK57VOru_FLmGKPuty-X0h9/exec',
+
     // Site Information
     SITE_NAME: 'יהודה אבורוס - 4 המינים',
     CONTACT_EMAIL: 'danielknafel@gmail.com',
