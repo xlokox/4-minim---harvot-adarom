@@ -70,6 +70,59 @@
     $$('[data-toggle]', p).forEach(b=> b.classList.toggle('a11y-active', !!state[b.dataset.toggle]));
   }
 
+  // Accessibility Statement UI (banner + modal)
+  function createStatementUI(){
+    if(document.getElementById('a11yBanner')) return;
+    // Banner
+    const banner = document.createElement('div');
+    banner.id = 'a11yBanner';
+    banner.className = 'a11y-banner';
+    banner.hidden = true;
+    banner.setAttribute('role','region');
+    banner.setAttribute('aria-label','הצהרת נגישות');
+    banner.innerHTML = `
+      <span><strong>הצהרת נגישות:</strong> האתר מחויב להנגשה מלאה לפי WCAG 2.1 AA.</span>
+      <div class="a11y-banner-actions">
+        <button type="button" class="a11y-btn" id="a11yBannerOpen">צפייה</button>
+        <button type="button" class="a11y-btn" id="a11yBannerClose">סגור</button>
+      </div>`;
+    document.body.appendChild(banner);
+    document.getElementById('a11yBannerClose').addEventListener('click', ()=> banner.hidden = true);
+    document.getElementById('a11yBannerOpen').addEventListener('click', ()=>{ banner.hidden = true; openStatementModal(); });
+
+    // Modal
+    const modal = document.createElement('div');
+    modal.id = 'a11yStatementModal';
+    modal.className = 'a11y-modal';
+    modal.hidden = true;
+    modal.innerHTML = `
+      <div class="a11y-modal-card" role="dialog" aria-labelledby="a11yStatementTitle">
+        <div class="a11y-modal-header">
+          <div id="a11yStatementTitle">הצהרת נגישות</div>
+          <button type="button" class="a11y-modal-close" aria-label="סגור">✕</button>
+        </div>
+        <div class="a11y-modal-body">
+          <p><strong>ארבעת המינים</strong> מחויבים להנגשת האתר לכלל הציבור בהתאם לתקן הישראלי (ת"י 5568) ול-WCAG 2.1 ברמת AA.</p>
+          <ul>
+            <li>מבנה HTML סמנטי ותמיכה מלאה במקלדת</li>
+            <li>טקסט חלופי לתמונות וניגודיות מספקת</li>
+            <li>טפסים נגישים והודעות שגיאה ברורות</li>
+          </ul>
+          <p>לפניות בנושא נגישות: 052-505-5318 · aravothdarom@gmail.com</p>
+          <p>תאריך עדכון אחרון: 2025</p>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    document.querySelector('#a11yStatementModal .a11y-modal-close').addEventListener('click', closeStatementModal);
+    modal.addEventListener('click', (e)=>{ if(e.target === modal) closeStatementModal(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeStatementModal(); });
+  }
+
+  function showStatementBanner(){ createStatementUI(); const b = document.getElementById('a11yBanner'); if(b) b.hidden = false; }
+  function openStatementModal(){ createStatementUI(); const m = document.getElementById('a11yStatementModal'); if(m) m.hidden = false; }
+  function closeStatementModal(){ const m = document.getElementById('a11yStatementModal'); if(m) m.hidden = true; }
+
+
   function ensureUI(){
     if($('#'+TOGGLE_ID)) return; // once
 
@@ -120,6 +173,9 @@
         <button class="a11y-tile" data-toggle="hideImages" type="button"><span>Hide Images</span></button>
       </div>`;
     document.body.appendChild(panel);
+    // Prepare statement UI once
+    createStatementUI();
+
 
     // Wire events
     fab.addEventListener('click', ()=>{ panel.hidden = !panel.hidden; if(!panel.hidden) syncControls(panel); });
@@ -128,8 +184,7 @@
     $('#a11y-reset', panel).addEventListener('click', resetAll);
     $('#a11y-statement', panel).addEventListener('click', ()=>{
       panel.hidden = true;
-      const el = document.getElementById('accessibility-statement');
-      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+      showStatementBanner();
     });
 
     // Ranges
