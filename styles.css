@@ -829,6 +829,24 @@ header h1 {
     box-shadow: 0 0 0 2px rgba(74, 124, 89, 0.1);
 }
 
+
+/* Quantity stepper controls */
+.kashrut-option { justify-content: space-between; }
+.qty-control, .kashrut-option .qty-control { display: inline-flex; align-items: center; gap: 6px; margin-inline-start: auto; }
+.qty-btn { width: 36px; height: 36px; border-radius: 8px; border: 2px solid #4a7c59; background: #ffffff; color: #2c5530; font-size: 20px; font-weight: 700; line-height: 1; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s ease; }
+.qty-btn:hover { background: #f0f8f3; box-shadow: 0 2px 8px rgba(74,124,89,.2); }
+.qty-btn:active { transform: scale(.96); }
+.qty-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Hide native number spinners to avoid duplication */
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.quantity-input[type=number] { -moz-appearance: textfield; }
+
+/* Size the input to match buttons */
+.quantity-input { height: 36px; width: 56px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 8px; }
+.quantity-input:focus { border-color: #4a7c59; box-shadow: 0 0 0 3px rgba(74,124,89,.12); }
+
 .kashrut-option label {
     flex: 1;
     font-size: 16px;
@@ -1236,12 +1254,6 @@ header h1 {
         font-size: 1.3rem;
     }
 }
-    background-clip: text;
-    padding: 0.5rem;
-    border-radius: 8px;
-    display: inline-block;
-}
-
 .single-price .price {
     background: #f0f8f0;
     color: #2c5530;
@@ -1689,36 +1701,36 @@ footer a:focus {
     .container {
         padding: 0 15px;
     }
-    
+
     header h1 {
         font-size: 2rem;
     }
-    
+
     .hero h2 {
         font-size: 1.8rem;
     }
-    
+
     .hero-description {
         font-size: 1rem;
     }
-    
+
     .products-grid,
     .packages-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .package-card.featured {
         transform: none;
     }
-    
+
     .package-card.featured:hover {
         transform: translateY(-5px);
     }
-    
+
     .order-form-container {
         padding: 1.5rem;
     }
-    
+
     .radio-group {
         gap: 0.75rem;
     }

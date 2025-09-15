@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     setupAccessibility();
     setupShippingCheckbox();
+    enhanceQuantityInputs();
 });
 
 function initializeForm() {
@@ -72,16 +73,16 @@ function initializeForm() {
 function setupEventListeners() {
     // Form submission
     orderForm.addEventListener('submit', handleFormSubmit);
-    
+
     // No longer need quantity selection since we use shopping cart
-    
+
     // Real-time validation
     const inputs = orderForm.querySelectorAll('input, textarea, select');
     inputs.forEach(input => {
         input.addEventListener('blur', () => validateField(input));
         input.addEventListener('input', () => clearError(input));
     });
-    
+
     // No longer need package validation since we use shopping cart
 }
 
@@ -131,10 +132,74 @@ function setupShippingCheckbox() {
     }
 }
 
+// Quantity stepper: add clear +/- controls to all numeric quantity inputs
+function enhanceQuantityInputs() {
+    const inputs = document.querySelectorAll('.quantity-input');
+    inputs.forEach(input => {
+        // Avoid enhancing twice
+        if (input.closest('.qty-control')) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'qty-control';
+
+        const btnDec = document.createElement('button');
+        btnDec.type = 'button';
+        btnDec.className = 'qty-btn qty-dec';
+        btnDec.setAttribute('aria-label', 'הפחת כמות');
+        btnDec.title = 'הפחת כמות';
+        btnDec.textContent = '◀';
+
+        const btnInc = document.createElement('button');
+        btnInc.type = 'button';
+        btnInc.className = 'qty-btn qty-inc';
+        btnInc.setAttribute('aria-label', 'הוסף כמות');
+        btnInc.title = 'הוסף כמות';
+        btnInc.textContent = '\u25B6';
+
+        // Place wrapper where the input is
+        const parent = input.parentNode;
+        parent.insertBefore(wrapper, input);
+        wrapper.appendChild(btnDec);
+        wrapper.appendChild(input);
+        wrapper.appendChild(btnInc);
+
+        const step = parseInt(input.getAttribute('step') || '1', 10);
+        const min = parseInt(input.getAttribute('min') || '0', 10);
+        const max = parseInt(input.getAttribute('max') || '50', 10);
+
+        const adjust = (delta) => {
+            const current = parseInt(input.value || '0', 10);
+            const next = Math.min(max, Math.max(min, current + delta * step));
+            if (next !== current) {
+                input.value = String(next);
+                // bubble input/change for any listeners that recalc prices/cart
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            // Toggle disabled state according to limits
+            btnDec.disabled = (next <= min);
+            btnInc.disabled = (next >= max);
+        };
+
+        // Initial state
+        adjust(0);
+
+        btnDec.addEventListener('click', () => adjust(-1));
+        btnInc.addEventListener('click', () => adjust(1));
+
+        // Keyboard support on input itself
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') { e.preventDefault(); adjust(1); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); adjust(-1); }
+        });
+    });
+}
+
+
 function handleRadioKeydown(event) {
     const radios = Array.from(orderForm.querySelectorAll(`input[name="${event.target.name}"]`));
     const currentIndex = radios.indexOf(event.target);
-    
+
     switch(event.key) {
         case 'ArrowDown':
         case 'ArrowRight':
@@ -219,15 +284,15 @@ function validateForm() {
     } else {
         console.log('  address: ⏭️ Skipped (shipping not needed)');
     }
-    
+
     // Validate package selection
     const packageField = orderForm.querySelector('input[name="package"]:checked');
     if (!validateField(packageField || orderForm.querySelector('input[name="package"]'))) {
         isValid = false;
     }
-    
+
     // No longer need quantity validation since we use shopping cart
-    
+
     return isValid;
 }
 
@@ -251,14 +316,14 @@ function validateField(field) {
             return true; // Address is not required if shipping is not selected
         }
     }
-    
-    const value = field.type === 'checkbox' ? field.checked : 
+
+    const value = field.type === 'checkbox' ? field.checked :
                   field.type === 'radio' ? orderForm.querySelector(`input[name="${fieldName}"]:checked`)?.value :
                   field.value.trim();
-    
+
     let isValid = true;
     let errorMessage = '';
-    
+
     // Required validation
     if (rule.required) {
         if (field.type === 'checkbox' && !field.checked) {
@@ -272,45 +337,45 @@ function validateField(field) {
             errorMessage = rule.message;
         }
     }
-    
+
     // Pattern validation
     if (isValid && value && rule.pattern && !rule.pattern.test(value)) {
         isValid = false;
         errorMessage = rule.message;
     }
-    
+
     // Length validation
     if (isValid && value && rule.minLength && value.length < rule.minLength) {
         isValid = false;
         errorMessage = rule.message;
     }
-    
+
     // Number validation
     if (isValid && value && (rule.min !== undefined || rule.max !== undefined)) {
         const numValue = parseInt(value);
-        if (isNaN(numValue) || 
+        if (isNaN(numValue) ||
             (rule.min !== undefined && numValue < rule.min) ||
             (rule.max !== undefined && numValue > rule.max)) {
             isValid = false;
             errorMessage = rule.message;
         }
     }
-    
+
     // Display error
     const errorElement = document.getElementById(`${fieldName}-error`) ||
                         document.getElementById(`${field.id}-error`);
-    
+
     if (errorElement) {
         errorElement.textContent = isValid ? '' : errorMessage;
         errorElement.setAttribute('aria-live', isValid ? 'off' : 'polite');
     }
-    
+
     // Update field styling
     if (field.type !== 'radio') {
         field.classList.toggle('error', !isValid);
         field.setAttribute('aria-invalid', !isValid);
     }
-    
+
     return isValid;
 }
 
@@ -318,7 +383,7 @@ function clearError(field) {
     const fieldName = field.name || field.id;
     const errorElement = document.getElementById(`${fieldName}-error`) ||
                         document.getElementById(`${field.id}-error`);
-    
+
     if (errorElement && errorElement.textContent) {
         errorElement.textContent = '';
         errorElement.setAttribute('aria-live', 'off');
@@ -478,7 +543,7 @@ function sendToGoogleSheets(data) {
 // Utility function for smooth scrolling (fallback for older browsers)
 function smoothScrollTo(element) {
     if (element) {
-        element.scrollIntoView({ 
+        element.scrollIntoView({
             behavior: 'smooth',
             block: 'start'
         });
