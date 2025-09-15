@@ -49,7 +49,7 @@
     ├── 🍋 etrog.jpg                 # תמונת אתרוג
     ├── 🌿 lulav.jpg                 # תמונת לולב
     ├── 🌱 hadas.jpg                 # תמונת הדס
-    └── 🍃 arava.jpg                 # תמונת עערבה
+    └── 🍃 arava.jpg                 # תמונת ערבה
 ```
 
 ## הוראות התקנה
@@ -60,7 +60,7 @@
    - `etrog.jpg` - אתרוג מהודר
    - `lulav.jpg` - לולב ישר וטרי
    - `hadas.jpg` - הדס משולש
-   - `arava.jpg` - עערבה טריה
+   - `arava.jpg` - ערבה טריה
 
 ### שלב 2: הגדרת Google Sheets
 
